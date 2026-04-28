@@ -7,8 +7,9 @@ export default async function handler(req, res) {
 
     if (!KIT_API_KEY) throw new Error('Missing API key');
 
+    // Get all subscribers to count them
     const kitRes = await fetch(
-      `https://api.kit.com/v4/forms/${formId}/subscribers?per_page=1`,
+      `https://api.kit.com/v4/subscribers?per_page=1`,
       {
         method: 'GET',
         headers: {
@@ -21,9 +22,17 @@ export default async function handler(req, res) {
     if (!kitRes.ok) throw new Error('Kit API returned ' + kitRes.status);
 
     const data = await kitRes.json();
-    const count = data.pagination?.total ?? 0;
+    
+    // Log the full response so we can see the structure
+    console.log('Kit response:', JSON.stringify(data));
+    
+    const count = data.pagination?.total_count 
+      ?? data.pagination?.total
+      ?? data.meta?.total_count
+      ?? data.total_subscribers
+      ?? 0;
 
-    return res.status(200).json({ count });
+    return res.status(200).json({ count, debug: data.pagination });
 
   } catch (err) {
     return res.status(200).json({ count: 0, error: err.message });
