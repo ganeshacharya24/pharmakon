@@ -308,7 +308,7 @@
       .preview-body{grid-template-columns:1fr;}
       .preview-sidebar{border-right:none;border-bottom:1px solid var(--border);}
       .why-grid{grid-template-columns:1fr;}
-    
+    }
     @media(max-width:575px){
       .waitlist-row{flex-direction:column;}
       h1{font-size:2.4rem;}
@@ -854,11 +854,11 @@
   // Update FALLBACK_COUNT manually to match your real Kit total
   // until the Netlify function is deployed.
 
-  const FALLBACK_COUNT = 3; // ← your real Kit subscriber count
+  const FALLBACK_COUNT = 4; // ← matches current Kit total
 
   async function fetchLiveCount() {
     try {
-      const res = await fetch('/.netlify/functions/subscriber-count');
+      const res = await fetch('/api/subscriber-count');
       if (!res.ok) throw new Error('Function error');
       const data = await res.json();
       const count = data.count || 0;
@@ -868,7 +868,6 @@
         updateCounters(FALLBACK_COUNT);
       }
     } catch (e) {
-      // Function not deployed yet — use fallback
       updateCounters(FALLBACK_COUNT);
     }
   }
@@ -917,11 +916,8 @@
   // Fetch real count on page load
   fetchLiveCount();
 
-  // ─── WAITLIST — Kit hidden form POST (reliable, no CORS) ───
-  // Posts directly to Kit's native HTML form endpoint via a
-  // hidden iframe. No API key needed. Works on any static host.
-
-  const KIT_FORM_ID = '9353033';
+  // ─── WAITLIST — Supabase via Vercel function ───────────────
+  // Saves emails to Supabase and returns live count automatically.
 
   function handleWL() {
     const input = document.getElementById('wlEmail');
@@ -929,57 +925,40 @@
     const msg   = document.getElementById('wl-msg');
     const val   = input.value.trim();
 
-    // Validate email
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
       msg.style.color = '#FCA5A5';
       msg.textContent = 'Please enter a valid email address.';
       return;
     }
 
-    // Loading state
     btn.disabled = true;
     btn.textContent = 'Joining…';
     msg.textContent = '';
 
-    // Create hidden iframe — catches Kit's redirect so page stays put
-    const iframeName = 'kit_target_' + Date.now();
-    const iframe = document.createElement('iframe');
-    iframe.name = iframeName;
-    iframe.style.cssText = 'display:none;width:0;height:0;border:none;';
-    document.body.appendChild(iframe);
-
-    // Create hidden form posting to Kit's native endpoint
-    const form = document.createElement('form');
-    form.method  = 'POST';
-    form.action  = `https://app.kit.com/forms/${KIT_FORM_ID}/subscriptions`;
-    form.target  = iframeName;
-    form.style.display = 'none';
-
-    // Email field — Kit requires this exact field name
-    const emailInput = document.createElement('input');
-    emailInput.type  = 'hidden';
-    emailInput.name  = 'email_address';
-    emailInput.value = val;
-    form.appendChild(emailInput);
-
-    document.body.appendChild(form);
-    form.submit();
-
-    // After 2s assume success — Kit's form always accepts valid emails
-    setTimeout(() => {
-      msg.style.color = '#7BBDFF';
-      msg.textContent = "You're on the list — we'll be in touch soon.";
-      input.value   = '';
-      input.disabled = true;
-      btn.textContent = 'Joined ✓';
-      incrementCounter();
-
-      // Clean up
-      document.body.removeChild(form);
-      setTimeout(() => {
-        if (document.body.contains(iframe)) document.body.removeChild(iframe);
-      }, 3000);
-    }, 2000);
+    fetch('/api/subscriber-count', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: val }),
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success || data.message === 'Already registered') {
+        msg.style.color = '#7BBDFF';
+        msg.textContent = "You're on the list — we'll be in touch soon.";
+        input.value = '';
+        input.disabled = true;
+        btn.textContent = 'Joined ✓';
+        fetchLiveCount();
+      } else {
+        throw new Error(data.error || 'Unknown error');
+      }
+    })
+    .catch(() => {
+      msg.style.color = '#FCA5A5';
+      msg.textContent = 'Something went wrong. Please try again.';
+      btn.disabled = false;
+      btn.textContent = 'Join Waitlist';
+    });
   }
 
   document.getElementById('wlEmail')?.addEventListener('keydown', e => {
