@@ -1,0 +1,1972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Phármakon — Health Profile</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <style>
+    :root {
+      --ink:      #002677;
+      --ink2:     #1A3A6B;
+      --ink3:     #6B85A8;
+      --blue:     #196ECF;
+      --blue-lt:  #EDF4FF;
+      --blue-mid: #C4D9F0;
+      --bg:       #F7F9FC;
+      --white:    #FFFFFF;
+      --border:   #DDE6F0;
+      --gold:     #D47C0F;
+      --gold-lt:  #FEF3DC;
+      --red:      #D94040;
+      --red-lt:   #FEE9E9;
+      --green:    #0B8F6E;
+      --green-lt: #E6F5EF;
+      --shadow:   0 2px 12px rgba(0,38,119,.07);
+      --shadow-lg:0 8px 32px rgba(0,38,119,.12);
+      --r:        12px;
+      --r-sm:     8px;
+      --sidebar:  240px;
+    }
+
+    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+    html,body { height:100%; overflow:hidden; }
+    body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--bg); color:var(--ink); font-size:14px; -webkit-font-smoothing:antialiased; }
+
+    h1,h2,h3,h4 { font-family:'Instrument Serif',serif; font-weight:400; letter-spacing:-.02em; }
+    .mono { font-family:'JetBrains Mono',monospace; }
+
+    /* ── SCREEN SYSTEM ──────────────────────────────── */
+    .scene { position:fixed; inset:0; transition:opacity .35s ease, transform .35s ease; }
+    .scene.hidden { opacity:0; pointer-events:none; transform:translateY(8px); }
+
+    /* ── DEMO SYSTEM ──────────────────────────────── */
+    #demoLauncher {
+      position:fixed; inset:0; z-index:9000;
+      background:rgba(0,18,60,.88);
+      backdrop-filter:blur(8px);
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:1.4rem;
+      transition:opacity .6s ease;
+    }
+    #demoLauncher.hide { opacity:0; pointer-events:none; }
+
+    .demo-launch-logo {
+      display:flex; align-items:center; gap:.7rem; margin-bottom:.5rem;
+    }
+    .demo-launch-icon {
+      width:44px; height:44px; border-radius:12px;
+      background:rgba(255,255,255,.12);
+      display:flex; align-items:center; justify-content:center;
+      color:white; font-size:1.2rem;
+    }
+    .demo-launch-name {
+      font-family:'Instrument Serif',serif;
+      font-size:1.8rem; color:white; letter-spacing:-.02em;
+    }
+    .demo-launch-label {
+      font-family:'JetBrains Mono',monospace;
+      font-size:.72rem; letter-spacing:.15em; text-transform:uppercase;
+      color:rgba(255,255,255,.45);
+    }
+    .demo-launch-title {
+      font-family:'Instrument Serif',serif;
+      font-size:2rem; color:white; text-align:center; line-height:1.2;
+    }
+    .demo-launch-sub {
+      font-size:.92rem; color:rgba(255,255,255,.5);
+      text-align:center; max-width:380px; line-height:1.6;
+    }
+    .btn-start-demo {
+      background:white; color:var(--ink);
+      border:none; border-radius:100px;
+      padding:.9rem 2.4rem; font-weight:700; font-size:1rem;
+      font-family:'Plus Jakarta Sans',sans-serif;
+      cursor:pointer; transition:all .2s;
+      display:flex; align-items:center; gap:.6rem;
+      margin-top:.5rem;
+    }
+    .btn-start-demo:hover { transform:scale(1.04); box-shadow:0 12px 32px rgba(0,0,0,.25); }
+    .demo-launch-duration {
+      font-size:.8rem; color:rgba(255,255,255,.3);
+      font-family:'JetBrains Mono',monospace;
+    }
+
+    /* Demo progress bar */
+    #demoProgress {
+      position:fixed; top:0; left:0; right:0; height:3px;
+      z-index:8000; display:none;
+    }
+    #demoProgressFill {
+      height:100%; background:var(--blue);
+      transition:width .6s cubic-bezier(.22,1,.36,1);
+      width:0%;
+    }
+
+    /* Chapter label */
+    #chapterLabel {
+      position:fixed; bottom:1.4rem; left:50%; transform:translateX(-50%);
+      background:rgba(0,18,60,.75); backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:100px; padding:.4rem 1.2rem;
+      font-family:'JetBrains Mono',monospace;
+      font-size:.72rem; letter-spacing:.1em; text-transform:uppercase;
+      color:rgba(255,255,255,.7);
+      z-index:8000; display:none;
+      transition:opacity .4s; pointer-events:none;
+    }
+
+    /* Demo cursor */
+    #demoCursor {
+      position:fixed; z-index:8500; pointer-events:none;
+      display:none;
+      transition:left .55s cubic-bezier(.22,1,.36,1), top .55s cubic-bezier(.22,1,.36,1);
+    }
+    .cursor-dot {
+      width:24px; height:24px; border-radius:50%;
+      background:rgba(25,110,207,.9);
+      border:2px solid white;
+      box-shadow:0 2px 12px rgba(0,38,119,.4);
+      position:relative;
+    }
+    .cursor-ring {
+      position:absolute; inset:-8px;
+      border-radius:50%; border:2px solid rgba(25,110,207,.4);
+      animation:cursorRing 1s ease-out infinite;
+    }
+    @keyframes cursorRing {
+      0%   { transform:scale(1); opacity:.8; }
+      100% { transform:scale(1.8); opacity:0; }
+    }
+    .cursor-click {
+      position:absolute; inset:-4px; border-radius:50%;
+      background:rgba(25,110,207,.35);
+      transform:scale(0); opacity:0;
+      transition:transform .15s ease, opacity .15s;
+    }
+    .cursor-click.pulse { transform:scale(1); opacity:1; }
+
+    /* Demo end card */
+    #demoEndCard {
+      position:fixed; inset:0; z-index:9000;
+      background:var(--ink);
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:1.2rem;
+      opacity:0; pointer-events:none;
+      transition:opacity .8s ease;
+    }
+    #demoEndCard.show { opacity:1; pointer-events:all; }
+    .end-card-icon {
+      width:60px; height:60px; border-radius:16px;
+      background:rgba(255,255,255,.1);
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.6rem; color:white; margin-bottom:.5rem;
+    }
+    .end-card-name {
+      font-family:'Instrument Serif',serif;
+      font-size:2.8rem; color:white; letter-spacing:-.03em;
+    }
+    .end-card-tag {
+      font-family:'JetBrains Mono',monospace;
+      font-size:.72rem; letter-spacing:.15em; text-transform:uppercase;
+      color:rgba(255,255,255,.35);
+    }
+    .end-card-tagline {
+      font-family:'Instrument Serif',serif;
+      font-size:1.1rem; color:rgba(255,255,255,.55); font-style:italic;
+      margin-top:.2rem;
+    }
+    .btn-replay {
+      margin-top:1rem; background:rgba(255,255,255,.1);
+      border:1px solid rgba(255,255,255,.15); color:white;
+      border-radius:100px; padding:.7rem 1.8rem;
+      font-size:.88rem; font-weight:600; cursor:pointer;
+      font-family:'Plus Jakarta Sans',sans-serif;
+      transition:all .2s; display:flex; align-items:center; gap:.5rem;
+    }
+    .btn-replay:hover { background:rgba(255,255,255,.18); }
+
+    /* Highlight pulse on elements during demo */
+    .demo-highlight {
+      outline:2.5px solid var(--blue) !important;
+      outline-offset:3px;
+      border-radius:var(--r-sm);
+      transition:outline .2s;
+    }
+
+    /* ── LOGIN ──────────────────────────────────────── */
+    #login {
+      background: var(--ink);
+      display:flex; align-items:center; justify-content:center;
+      overflow: hidden;
+    }
+
+    .login-bg {
+      position:absolute; inset:0;
+      background: radial-gradient(ellipse at 30% 50%, rgba(25,110,207,.25) 0%, transparent 60%),
+                  radial-gradient(ellipse at 80% 20%, rgba(25,110,207,.12) 0%, transparent 50%);
+    }
+
+    .login-grid {
+      position:absolute; inset:0;
+      background-image: linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    .login-card {
+      background: white;
+      border-radius: 20px;
+      padding: 2.8rem;
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 32px 80px rgba(0,0,0,.25);
+    }
+
+    .login-brand {
+      display:flex; align-items:center; gap:.6rem;
+      margin-bottom: 2rem;
+    }
+
+    .login-brand-icon {
+      width:36px; height:36px; border-radius:10px;
+      background:var(--ink);
+      display:flex; align-items:center; justify-content:center;
+      color:white; font-size:1rem;
+    }
+
+    .login-brand-name {
+      font-family:'Instrument Serif',serif;
+      font-size:1.4rem; color:var(--ink); letter-spacing:-.03em;
+    }
+
+    .login-card h2 { font-size:1.5rem; margin-bottom:.4rem; }
+    .login-card p  { font-size:.88rem; color:var(--ink3); margin-bottom:1.8rem; }
+
+    .form-label-custom { font-size:.8rem; font-weight:700; color:var(--ink2); margin-bottom:.4rem; display:block; }
+
+    .form-input {
+      width:100%; border:1.5px solid var(--border);
+      border-radius:var(--r-sm); padding:.75rem 1rem;
+      font-size:.9rem; font-family:'Plus Jakarta Sans',sans-serif;
+      color:var(--ink); background:var(--bg);
+      outline:none; transition:border-color .2s;
+      margin-bottom:1rem;
+    }
+    .form-input:focus { border-color:var(--blue); background:white; }
+
+    .btn-login {
+      width:100%; background:var(--ink); color:white;
+      border:none; border-radius:var(--r-sm);
+      padding:.85rem; font-weight:700; font-size:.95rem;
+      font-family:'Plus Jakarta Sans',sans-serif;
+      cursor:pointer; transition:all .2s;
+    }
+    .btn-login:hover { background:var(--blue); transform:translateY(-1px); box-shadow:var(--shadow-lg); }
+
+    .login-divider { display:flex; align-items:center; gap:.75rem; margin:1.2rem 0; color:var(--ink3); font-size:.8rem; }
+    .login-divider::before,.login-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+    .btn-google {
+      width:100%; background:white; color:var(--ink);
+      border:1.5px solid var(--border); border-radius:var(--r-sm);
+      padding:.75rem; font-weight:600; font-size:.88rem;
+      font-family:'Plus Jakarta Sans',sans-serif;
+      cursor:pointer; transition:all .2s;
+      display:flex; align-items:center; justify-content:center; gap:.6rem;
+    }
+    .btn-google:hover { border-color:var(--blue); background:var(--blue-lt); }
+
+    .login-footer { text-align:center; margin-top:1.5rem; font-size:.8rem; color:var(--ink3); }
+    .login-footer a { color:var(--blue); font-weight:600; text-decoration:none; }
+
+    /* ── APP SHELL ──────────────────────────────────── */
+    #app { display:flex; height:100vh; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width:var(--sidebar); flex-shrink:0;
+      background:var(--ink);
+      display:flex; flex-direction:column;
+      padding:1.2rem 0;
+      position:relative; z-index:10;
+    }
+
+    .sidebar-brand {
+      display:flex; align-items:center; gap:.6rem;
+      padding:.4rem 1.2rem 1.4rem;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      margin-bottom:.8rem;
+    }
+
+    .sidebar-brand-icon {
+      width:28px; height:28px; border-radius:7px;
+      background:rgba(255,255,255,.12);
+      display:flex; align-items:center; justify-content:center;
+      color:white; font-size:.8rem;
+    }
+
+    .sidebar-brand-name {
+      font-family:'Instrument Serif',serif;
+      font-size:1.15rem; color:white; letter-spacing:-.02em;
+    }
+
+    .nav-item-s {
+      display:flex; align-items:center; gap:.75rem;
+      padding:.7rem 1.2rem; margin:0 .5rem;
+      border-radius:var(--r-sm);
+      color:rgba(255,255,255,.55);
+      font-size:.85rem; font-weight:600;
+      cursor:pointer; transition:all .2s;
+      text-decoration:none;
+    }
+    .nav-item-s:hover { background:rgba(255,255,255,.07); color:rgba(255,255,255,.85); }
+    .nav-item-s.active { background:rgba(255,255,255,.12); color:white; }
+    .nav-item-s i { font-size:1rem; width:18px; text-align:center; }
+
+    .nav-section-label {
+      font-family:'JetBrains Mono',monospace;
+      font-size:.62rem; letter-spacing:.12em; text-transform:uppercase;
+      color:rgba(255,255,255,.25); padding:.8rem 1.7rem .3rem;
+    }
+
+    .sidebar-footer {
+      margin-top:auto;
+      border-top:1px solid rgba(255,255,255,.08);
+      padding:1rem 1.2rem .4rem;
+    }
+
+    .sidebar-user {
+      display:flex; align-items:center; gap:.7rem;
+    }
+
+    .s-user-av {
+      width:32px; height:32px; border-radius:50%;
+      background:rgba(255,255,255,.15);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:700; font-size:.75rem; color:white; flex-shrink:0;
+    }
+
+    .s-user-name { font-weight:600; font-size:.82rem; color:white; }
+    .s-user-email { font-size:.72rem; color:rgba(255,255,255,.4); }
+
+    /* MAIN AREA */
+    .main-area {
+      flex:1; overflow-y:auto;
+      display:flex; flex-direction:column;
+    }
+
+    /* TOPBAR */
+    .topbar {
+      background:white; border-bottom:1px solid var(--border);
+      padding:.85rem 1.8rem;
+      display:flex; align-items:center; justify-content:space-between;
+      flex-shrink:0; position:sticky; top:0; z-index:5;
+    }
+
+    .topbar-title { font-size:1rem; font-weight:700; color:var(--ink); }
+    .topbar-sub   { font-size:.78rem; color:var(--ink3); margin-top:.1rem; }
+
+    .topbar-right { display:flex; align-items:center; gap:.75rem; }
+
+    .topbar-badge {
+      background:var(--blue-lt); color:var(--blue);
+      border-radius:100px; padding:.3rem .8rem;
+      font-size:.75rem; font-weight:700;
+      display:flex; align-items:center; gap:.35rem;
+    }
+
+    .topbar-badge .live-dot {
+      width:6px; height:6px; border-radius:50%; background:var(--green);
+      animation: livePulse 2s infinite;
+    }
+
+    @keyframes livePulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+
+    /* ── SCREENS ────────────────────────────────────── */
+    .screen { display:none; flex:1; padding:1.8rem; }
+    .screen.active { display:flex; flex-direction:column; gap:1.4rem; }
+
+    /* ── DASHBOARD ──────────────────────────────────── */
+    .dash-grid-top {
+      display:grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap:1.2rem;
+    }
+
+    .card {
+      background:white; border:1px solid var(--border);
+      border-radius:var(--r); padding:1.4rem;
+      box-shadow:var(--shadow);
+    }
+
+    .card-label {
+      font-family:'JetBrains Mono',monospace;
+      font-size:.65rem; letter-spacing:.12em; text-transform:uppercase;
+      color:var(--ink3); margin-bottom:.8rem;
+    }
+
+    /* Patient identity card */
+    .patient-card { display:flex; align-items:center; gap:1.2rem; }
+    .patient-av {
+      width:52px; height:52px; border-radius:50%;
+      background:var(--ink); color:white;
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Instrument Serif',serif; font-size:1.2rem; flex-shrink:0;
+    }
+    .patient-name { font-size:1.1rem; font-weight:700; margin-bottom:.15rem; }
+    .patient-meta { font-size:.78rem; color:var(--ink3); }
+    .patient-meta span { margin-right:.75rem; }
+
+    .patient-tags { display:flex; gap:.4rem; flex-wrap:wrap; margin-top:.7rem; }
+    .tag {
+      font-size:.72rem; font-weight:700; border-radius:100px; padding:.2rem .6rem;
+    }
+    .tag-blue  { background:var(--blue-lt);  color:var(--blue); }
+    .tag-gold  { background:var(--gold-lt);  color:var(--gold); }
+    .tag-red   { background:var(--red-lt);   color:var(--red); }
+    .tag-green { background:var(--green-lt); color:var(--green); }
+
+    /* Stat cards */
+    .stat-card-num {
+      font-family:'Instrument Serif',serif;
+      font-size:2.2rem; line-height:1; color:var(--ink);
+    }
+    .stat-card-num span { color:var(--blue); }
+    .stat-card-label { font-size:.8rem; color:var(--ink3); margin-top:.4rem; }
+    .stat-card-trend {
+      font-size:.72rem; font-weight:700; margin-top:.5rem;
+      display:flex; align-items:center; gap:.25rem;
+    }
+    .trend-up   { color:var(--gold); }
+    .trend-ok   { color:var(--green); }
+
+    /* Insight alert */
+    .insight-alert {
+      background: linear-gradient(135deg, var(--blue-lt) 0%, rgba(237,244,255,.5) 100%);
+      border:1.5px solid var(--blue-mid); border-radius:var(--r);
+      padding:1.2rem 1.4rem;
+      display:flex; align-items:flex-start; gap:1rem;
+    }
+    .insight-icon {
+      width:36px; height:36px; border-radius:var(--r-sm);
+      background:var(--blue); color:white;
+      display:flex; align-items:center; justify-content:center;
+      font-size:.95rem; flex-shrink:0; margin-top:.1rem;
+    }
+    .insight-title { font-weight:700; font-size:.9rem; color:var(--ink); margin-bottom:.3rem; }
+    .insight-body  { font-size:.83rem; color:var(--ink2); line-height:1.6; }
+    .insight-body strong { color:var(--blue); }
+    .btn-insight {
+      margin-top:.7rem; background:var(--ink); color:white;
+      border:none; border-radius:100px; padding:.45rem 1rem;
+      font-size:.78rem; font-weight:700; cursor:pointer;
+      font-family:'Plus Jakarta Sans',sans-serif;
+      transition:opacity .2s;
+    }
+    .btn-insight:hover { opacity:.85; }
+
+    /* Lab trends */
+    .lab-grid { display:flex; flex-direction:column; gap:.75rem; }
+    .lab-row-d { display:flex; align-items:center; gap:.75rem; font-size:.8rem; }
+    .lab-name-d { width:52px; color:var(--ink3); font-family:'JetBrains Mono',monospace; font-size:.72rem; }
+    .lab-track-d { flex:1; height:6px; background:var(--bg); border-radius:3px; overflow:hidden; border:1px solid var(--border); }
+    .lab-fill-d { height:100%; border-radius:3px; transition:width 1.4s cubic-bezier(.22,1,.36,1); width:0; }
+    .lab-fill-d.ok   { background:var(--green); }
+    .lab-fill-d.warn { background:var(--gold); }
+    .lab-fill-d.bad  { background:var(--red); }
+    .lab-val-d { width:38px; text-align:right; font-weight:700; font-family:'JetBrains Mono',monospace; font-size:.75rem; }
+    .lab-val-d.ok   { color:var(--green); }
+    .lab-val-d.warn { color:var(--gold); }
+    .lab-val-d.bad  { color:var(--red); }
+
+    .dash-grid-bottom { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+
+    /* Doc list */
+    .doc-row {
+      display:flex; align-items:center; gap:.8rem;
+      padding:.7rem 0; border-bottom:1px solid var(--border);
+      font-size:.83rem;
+    }
+    .doc-row:last-child { border:none; padding-bottom:0; }
+    .doc-row-icon {
+      width:32px; height:32px; border-radius:var(--r-sm);
+      background:var(--blue-lt); color:var(--blue);
+      display:flex; align-items:center; justify-content:center;
+      font-size:.85rem; flex-shrink:0;
+    }
+    .doc-row-name { font-weight:600; color:var(--ink); }
+    .doc-row-meta { font-size:.72rem; color:var(--ink3); }
+    .doc-row-tag  { margin-left:auto; }
+
+    /* Screenings */
+    .screening-row {
+      display:flex; align-items:center; gap:.8rem;
+      padding:.7rem 0; border-bottom:1px solid var(--border);
+    }
+    .screening-row:last-child { border:none; }
+    .screening-icon {
+      width:32px; height:32px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:.8rem; flex-shrink:0;
+    }
+    .screening-name { font-weight:600; font-size:.83rem; }
+    .screening-due  { font-size:.72rem; color:var(--ink3); }
+    .screening-badge { margin-left:auto; }
+
+    /* ── UPLOAD SCREEN ──────────────────────────────── */
+    .upload-area {
+      border:2px dashed var(--border); border-radius:var(--r);
+      background:white; padding:3rem 2rem; text-align:center;
+      cursor:pointer; transition:all .25s;
+    }
+    .upload-area.drag-over { border-color:var(--blue); background:var(--blue-lt); }
+    .upload-area:hover { border-color:var(--blue-mid); }
+
+    .upload-area-icon { font-size:2.5rem; color:var(--ink3); margin-bottom:1rem; }
+    .upload-area h3 { font-size:1.1rem; margin-bottom:.4rem; }
+    .upload-area p { font-size:.85rem; color:var(--ink3); }
+    .upload-area p strong { color:var(--blue); }
+
+    .upload-file-input { display:none; }
+
+    .processing-card {
+      background:white; border:1px solid var(--border);
+      border-radius:var(--r); overflow:hidden;
+      display:none;
+    }
+
+    .processing-card.show { display:block; }
+
+    .proc-header {
+      background:var(--bg); border-bottom:1px solid var(--border);
+      padding:.9rem 1.2rem;
+      display:flex; align-items:center; gap:.75rem;
+    }
+
+    .proc-file-icon {
+      width:36px; height:36px; border-radius:var(--r-sm);
+      background:var(--blue-lt); color:var(--blue);
+      display:flex; align-items:center; justify-content:center;
+      font-size:1rem; flex-shrink:0;
+    }
+
+    .proc-filename { font-weight:700; font-size:.88rem; }
+    .proc-filesize { font-size:.72rem; color:var(--ink3); }
+    .proc-status { margin-left:auto; font-size:.75rem; font-weight:700; }
+    .proc-status.extracting { color:var(--gold); }
+    .proc-status.done       { color:var(--green); }
+
+    .proc-bar-wrap { padding:0 1.2rem; margin:.75rem 0 0; }
+    .proc-bar { height:4px; background:var(--bg); border-radius:2px; overflow:hidden; margin-bottom:1.2rem; }
+    .proc-bar-fill { height:100%; background:var(--blue); border-radius:2px; width:0; transition:width .4s ease; }
+
+    .extraction-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:.75rem;
+      padding:0 1.2rem 1.2rem;
+    }
+
+    .ext-item {
+      background:var(--bg); border-radius:var(--r-sm);
+      padding:.75rem; opacity:0; transform:translateY(6px);
+      transition:opacity .3s, transform .3s;
+    }
+
+    .ext-item.appear { opacity:1; transform:translateY(0); }
+
+    .ext-label { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--ink3); margin-bottom:.3rem; font-family:'JetBrains Mono',monospace; }
+    .ext-value { font-size:.88rem; font-weight:600; color:var(--ink); }
+    .ext-value.highlight { color:var(--blue); }
+
+    .upload-complete-card {
+      background: linear-gradient(135deg, var(--green-lt), rgba(230,245,239,.4));
+      border:1.5px solid rgba(11,143,110,.2); border-radius:var(--r);
+      padding:1.4rem; display:none; align-items:center; gap:1rem;
+    }
+    .upload-complete-card.show { display:flex; }
+    .complete-icon {
+      width:44px; height:44px; border-radius:50%;
+      background:var(--green); color:white;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.2rem; flex-shrink:0;
+    }
+    .complete-title { font-weight:700; font-size:.95rem; color:var(--ink); }
+    .complete-body  { font-size:.82rem; color:var(--ink2); margin-top:.2rem; }
+    .btn-view-profile {
+      margin-left:auto; background:var(--ink); color:white;
+      border:none; border-radius:100px; padding:.5rem 1.1rem;
+      font-size:.78rem; font-weight:700; cursor:pointer;
+      font-family:'Plus Jakarta Sans',sans-serif; white-space:nowrap;
+      transition:opacity .2s;
+    }
+    .btn-view-profile:hover { opacity:.85; }
+
+    /* ── CHAT SCREEN ────────────────────────────────── */
+    .chat-layout { display:flex; gap:1.2rem; flex:1; min-height:0; }
+
+    .chat-sidebar-card {
+      width:220px; flex-shrink:0; background:white;
+      border:1px solid var(--border); border-radius:var(--r);
+      padding:1.2rem; display:flex; flex-direction:column; gap:.5rem;
+      height:fit-content;
+    }
+
+    .chat-ctx-label { font-family:'JetBrains Mono',monospace; font-size:.63rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ink3); margin-bottom:.4rem; }
+
+    .chat-ctx-item {
+      display:flex; justify-content:space-between; align-items:center;
+      font-size:.78rem; padding:.35rem 0; border-bottom:1px solid var(--border);
+    }
+    .chat-ctx-item:last-of-type { border:none; }
+    .chat-ctx-key { color:var(--ink3); }
+    .chat-ctx-val { font-weight:600; color:var(--ink); font-size:.75rem; }
+
+    .chat-main {
+      flex:1; background:white; border:1px solid var(--border);
+      border-radius:var(--r); display:flex; flex-direction:column;
+      min-height:0; overflow:hidden;
+    }
+
+    .chat-header {
+      padding:1rem 1.2rem; border-bottom:1px solid var(--border);
+      display:flex; align-items:center; gap:.75rem; flex-shrink:0;
+    }
+
+    .chat-ai-av {
+      width:32px; height:32px; border-radius:50%;
+      background:var(--ink); color:white;
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Instrument Serif',serif; font-size:.9rem;
+    }
+
+    .chat-ai-name  { font-weight:700; font-size:.88rem; }
+    .chat-ai-sub   { font-size:.72rem; color:var(--ink3); }
+
+    .chat-messages {
+      flex:1; overflow-y:auto; padding:1.2rem;
+      display:flex; flex-direction:column; gap:.9rem;
+    }
+
+    .msg { display:flex; gap:.6rem; align-items:flex-start; }
+    .msg.user { flex-direction:row-reverse; }
+
+    .msg-av {
+      width:28px; height:28px; border-radius:50%; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+      font-size:.68rem; font-weight:700; margin-top:2px;
+    }
+    .msg-av.ai   { background:var(--ink); color:white; }
+    .msg-av.user { background:var(--blue-lt); color:var(--blue); }
+
+    .msg-bub {
+      border-radius:12px; padding:.65rem .9rem;
+      font-size:.83rem; line-height:1.6; max-width:78%;
+    }
+    .msg-bub.ai {
+      background:var(--bg); border:1px solid var(--border);
+      color:var(--ink2); border-bottom-left-radius:3px;
+    }
+    .msg-bub.ai strong { color:var(--blue); }
+    .msg-bub.user {
+      background:var(--blue); color:white;
+      border-bottom-right-radius:3px;
+    }
+
+    .typing-bub {
+      background:var(--bg); border:1px solid var(--border);
+      border-radius:12px; border-bottom-left-radius:3px;
+      padding:.65rem .9rem; display:flex; gap:4px; align-items:center;
+    }
+    .typing-dot {
+      width:5px; height:5px; border-radius:50%; background:var(--ink3);
+      animation:typeDot 1.2s infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay:.2s; }
+    .typing-dot:nth-child(3) { animation-delay:.4s; }
+    @keyframes typeDot { 0%,80%,100%{opacity:.25;transform:scale(.8);} 40%{opacity:1;transform:scale(1);} }
+
+    .chat-input-area {
+      border-top:1px solid var(--border); padding:1rem 1.2rem;
+      display:flex; gap:.6rem; flex-shrink:0;
+    }
+
+    .chat-input {
+      flex:1; background:var(--bg); border:1.5px solid var(--border);
+      border-radius:100px; padding:.6rem 1.1rem;
+      font-size:.85rem; font-family:'Plus Jakarta Sans',sans-serif;
+      color:var(--ink); outline:none; transition:border-color .2s;
+    }
+    .chat-input:focus { border-color:var(--blue); background:white; }
+
+    .btn-send {
+      width:36px; height:36px; border-radius:50%;
+      background:var(--ink); color:white; border:none;
+      display:flex; align-items:center; justify-content:center;
+      font-size:.85rem; cursor:pointer; flex-shrink:0;
+      transition:background .2s, transform .15s;
+    }
+    .btn-send:hover { background:var(--blue); transform:scale(1.05); }
+
+    /* ── SUMMARY SCREEN ─────────────────────────────── */
+    .summary-layout { display:grid; grid-template-columns:1fr 280px; gap:1.4rem; align-items:start; }
+
+    .summary-doc {
+      background:white; border:1px solid var(--border); border-radius:var(--r);
+      overflow:hidden;
+    }
+
+    .summary-doc-header {
+      background:var(--ink); padding:1.4rem 1.8rem;
+      display:flex; justify-content:space-between; align-items:flex-start;
+    }
+
+    .summary-doc-title { font-family:'Instrument Serif',serif; font-size:1.3rem; color:white; }
+    .summary-doc-sub   { font-size:.78rem; color:rgba(255,255,255,.55); margin-top:.2rem; }
+
+    .summary-doc-body { padding:1.8rem; }
+
+    .sum-section { margin-bottom:1.8rem; }
+    .sum-section:last-child { margin:0; }
+
+    .sum-section-title {
+      font-family:'JetBrains Mono',monospace;
+      font-size:.65rem; letter-spacing:.15em; text-transform:uppercase;
+      color:var(--ink3); margin-bottom:.8rem;
+      padding-bottom:.5rem; border-bottom:1px solid var(--border);
+    }
+
+    .sum-row {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:.5rem 0; border-bottom:1px solid var(--bg); font-size:.85rem;
+    }
+    .sum-row:last-child { border:none; }
+    .sum-key { color:var(--ink3); }
+    .sum-val { font-weight:600; color:var(--ink); }
+
+    .concern-item {
+      display:flex; align-items:center; gap:.75rem;
+      padding:.6rem 0; border-bottom:1px solid var(--bg);
+    }
+    .concern-item:last-child { border:none; }
+    .concern-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .concern-dot.high   { background:var(--red); }
+    .concern-dot.medium { background:var(--gold); }
+    .concern-text { font-size:.85rem; color:var(--ink); flex:1; }
+    .concern-priority { font-size:.72rem; font-weight:700; border-radius:100px; padding:.18rem .55rem; }
+
+    .summary-actions-card {
+      background:white; border:1px solid var(--border); border-radius:var(--r);
+      padding:1.4rem; position:sticky; top:1.8rem;
+    }
+
+    .btn-action {
+      width:100%; border-radius:var(--r-sm);
+      padding:.7rem 1rem; font-size:.85rem; font-weight:700;
+      font-family:'Plus Jakarta Sans',sans-serif;
+      display:flex; align-items:center; gap:.5rem; justify-content:center;
+      cursor:pointer; transition:all .2s; border:none; margin-bottom:.6rem;
+    }
+    .btn-action:last-child { margin:0; }
+    .btn-action.primary { background:var(--ink); color:white; }
+    .btn-action.primary:hover { background:var(--blue); }
+    .btn-action.secondary { background:var(--bg); color:var(--ink); border:1.5px solid var(--border); }
+    .btn-action.secondary:hover { border-color:var(--blue); background:var(--blue-lt); }
+
+    .share-row {
+      display:flex; gap:.5rem; margin-top:1rem;
+      padding-top:1rem; border-top:1px solid var(--border);
+    }
+
+    .share-icon-btn {
+      flex:1; background:var(--bg); border:1px solid var(--border);
+      border-radius:var(--r-sm); padding:.55rem;
+      display:flex; align-items:center; justify-content:center;
+      font-size:.9rem; color:var(--ink3); cursor:pointer;
+      transition:all .2s;
+    }
+    .share-icon-btn:hover { border-color:var(--blue); color:var(--blue); background:var(--blue-lt); }
+
+    /* ── PROFILE SCREEN ─────────────────────────────── */
+    .profile-two-col { display:grid; grid-template-columns:280px 1fr; gap:1.2rem; align-items:start; }
+
+    .profile-id-card {
+      background:white; border:1px solid var(--border); border-radius:var(--r);
+      overflow:hidden;
+    }
+
+    .profile-id-top {
+      background:var(--ink); padding:1.8rem 1.4rem 1rem;
+      text-align:center;
+    }
+
+    .profile-big-av {
+      width:64px; height:64px; border-radius:50%;
+      background:rgba(255,255,255,.15); color:white;
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Instrument Serif',serif; font-size:1.5rem;
+      margin:0 auto .8rem;
+    }
+
+    .profile-id-name { font-family:'Instrument Serif',serif; font-size:1.2rem; color:white; }
+    .profile-id-sub  { font-size:.75rem; color:rgba(255,255,255,.5); margin-top:.2rem; }
+
+    .profile-id-stats {
+      display:flex; border-top:1px solid rgba(255,255,255,.1); margin-top:1rem;
+    }
+
+    .profile-id-stat {
+      flex:1; text-align:center; padding:.75rem .5rem;
+      border-right:1px solid rgba(255,255,255,.1);
+    }
+    .profile-id-stat:last-child { border:none; }
+    .profile-id-stat-num { font-weight:700; font-size:.95rem; color:white; }
+    .profile-id-stat-label { font-size:.65rem; color:rgba(255,255,255,.4); }
+
+    .profile-id-body { padding:1.2rem; }
+
+    .profile-field {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:.5rem 0; border-bottom:1px solid var(--bg); font-size:.82rem;
+    }
+    .profile-field:last-child { border:none; }
+    .profile-field-key { color:var(--ink3); }
+    .profile-field-val { font-weight:600; color:var(--ink); font-size:.8rem; text-align:right; }
+
+    .profile-section { margin-bottom:1.2rem; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width:4px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+    /* Fade in */
+    @keyframes fadeIn { from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:none;} }
+    .fade-in { animation:fadeIn .35s ease forwards; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════ LOGIN ═══════════ -->
+<div id="login" class="scene">
+  <div class="login-bg"></div>
+  <div class="login-grid"></div>
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="login-brand-icon"><i class="bi bi-heart-pulse-fill"></i></div>
+      <div class="login-brand-name">Phármakon</div>
+    </div>
+    <h2>Welcome back</h2>
+    <p>Sign in to your health profile</p>
+
+    <label class="form-label-custom">Email address</label>
+    <input type="email" class="form-input" placeholder="you@example.com" id="loginEmail" value="jordan@example.com"/>
+
+    <label class="form-label-custom">Password</label>
+    <input type="password" class="form-input" placeholder="••••••••" id="loginPass" value="••••••••"/>
+
+    <button class="btn-login" onclick="doLogin()">Sign in to Phármakon</button>
+
+    <div class="login-divider">or</div>
+
+    <button class="btn-google" onclick="doLogin()">
+      <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continue with Google
+    </button>
+
+    <div class="login-footer">
+      Don't have an account? <a href="#">Create one free</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ APP ═══════════ -->
+<div id="app" class="scene hidden">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon"><i class="bi bi-heart-pulse-fill"></i></div>
+      <div class="sidebar-brand-name">Phármakon</div>
+    </div>
+
+    <div class="nav-section-label">Overview</div>
+    <a class="nav-item-s active" onclick="showScreen('dashboard', this)">
+      <i class="bi bi-grid-1x2"></i> Dashboard
+    </a>
+    <a class="nav-item-s" onclick="showScreen('profile', this)">
+      <i class="bi bi-person-circle"></i> My Profile
+    </a>
+
+    <div class="nav-section-label">Health Tools</div>
+    <a class="nav-item-s" onclick="showScreen('upload', this)">
+      <i class="bi bi-cloud-upload"></i> Upload Document
+    </a>
+    <a class="nav-item-s" onclick="showScreen('chat', this)">
+      <i class="bi bi-chat-dots"></i> Ask Phármakon
+    </a>
+    <a class="nav-item-s" onclick="showScreen('summary', this)">
+      <i class="bi bi-file-earmark-medical"></i> Pre-Visit Summary
+    </a>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="s-user-av">JA</div>
+        <div>
+          <div class="s-user-name">Jordan Alvarez</div>
+          <div class="s-user-email">jordan@example.com</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-area">
+
+    <!-- TOPBAR -->
+    <div class="topbar" id="topbar">
+      <div>
+        <div class="topbar-title" id="topbar-title">Dashboard</div>
+        <div class="topbar-sub" id="topbar-sub">Thursday, April 23, 2026</div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-badge">
+          <span class="live-dot"></span>
+          Profile up to date
+        </div>
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--blue-lt);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:.85rem;cursor:pointer;">
+          <i class="bi bi-bell"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── DASHBOARD ─── -->
+    <div class="screen active" id="screen-dashboard">
+
+      <!-- TOP ROW -->
+      <div class="dash-grid-top">
+
+        <!-- Patient card -->
+        <div class="card">
+          <div class="card-label">Patient Profile</div>
+          <div class="patient-card">
+            <div class="patient-av">JA</div>
+            <div style="flex:1;">
+              <div class="patient-name">Jordan Alvarez</div>
+              <div class="patient-meta">
+                <span><i class="bi bi-calendar3 me-1"></i>Age 36</span>
+                <span><i class="bi bi-geo-alt me-1"></i>Atlanta, GA</span>
+                <span><i class="bi bi-clock me-1"></i>5 years of data</span>
+              </div>
+              <div class="patient-tags">
+                <span class="tag tag-blue">Hypothyroidism</span>
+                <span class="tag tag-blue">GERD</span>
+                <span class="tag tag-gold">TSH Elevated</span>
+                <span class="tag tag-red">Ferritin Low</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stat: Providers -->
+        <div class="card">
+          <div class="card-label">Providers on File</div>
+          <div class="stat-card-num">4</div>
+          <div class="stat-card-label">Across 2 health systems</div>
+          <div class="stat-card-trend trend-ok">
+            <i class="bi bi-check-circle-fill"></i> All records imported
+          </div>
+        </div>
+
+        <!-- Stat: Documents -->
+        <div class="card">
+          <div class="card-label">Documents Processed</div>
+          <div class="stat-card-num">12</div>
+          <div class="stat-card-label">Labs, summaries, prescriptions</div>
+          <div class="stat-card-trend trend-up">
+            <i class="bi bi-exclamation-circle-fill"></i> 1 needs review
+          </div>
+        </div>
+
+      </div>
+
+      <!-- INSIGHT ALERT -->
+      <div class="insight-alert">
+        <div class="insight-icon"><i class="bi bi-stars"></i></div>
+        <div style="flex:1;">
+          <div class="insight-title">Active Insight — Fatigue pattern detected</div>
+          <div class="insight-body">
+            Your <strong>TSH has risen from 3.1 → 5.2</strong> over 18 months while you've reported fatigue 14 times. Combined with your <strong>ferritin of 18</strong> (below optimal for your age and sex), these three factors are the most likely contributors. A pre-visit summary connecting all three is ready for your next appointment.
+          </div>
+          <button class="btn-insight" onclick="showScreen('summary', document.querySelector('[onclick*=summary]'))">
+            View Pre-Visit Summary <i class="bi bi-arrow-right ms-1"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- BOTTOM ROW -->
+      <div class="dash-grid-bottom">
+
+        <!-- Lab trends -->
+        <div class="card">
+          <div class="card-label">Lab Trends</div>
+          <div class="lab-grid" id="dashLabs">
+            <div class="lab-row-d">
+              <span class="lab-name-d">TSH</span>
+              <div class="lab-track-d"><div class="lab-fill-d warn" data-w="82"></div></div>
+              <span class="lab-val-d warn">5.2</span>
+            </div>
+            <div class="lab-row-d">
+              <span class="lab-name-d">Ferritin</span>
+              <div class="lab-track-d"><div class="lab-fill-d bad" data-w="18"></div></div>
+              <span class="lab-val-d bad">18</span>
+            </div>
+            <div class="lab-row-d">
+              <span class="lab-name-d">HbA1c</span>
+              <div class="lab-track-d"><div class="lab-fill-d ok" data-w="62"></div></div>
+              <span class="lab-val-d ok">5.4%</span>
+            </div>
+            <div class="lab-row-d">
+              <span class="lab-name-d">Vit D</span>
+              <div class="lab-track-d"><div class="lab-fill-d ok" data-w="55"></div></div>
+              <span class="lab-val-d ok">38</span>
+            </div>
+            <div class="lab-row-d">
+              <span class="lab-name-d">Hgb</span>
+              <div class="lab-track-d"><div class="lab-fill-d ok" data-w="68"></div></div>
+              <span class="lab-val-d ok">12.8</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent documents -->
+        <div class="card">
+          <div class="card-label">Recent Documents</div>
+          <div class="doc-row">
+            <div class="doc-row-icon"><i class="bi bi-file-earmark-bar-graph"></i></div>
+            <div>
+              <div class="doc-row-name">Lab Panel — March 2026</div>
+              <div class="doc-row-meta">Uploaded 2 days ago</div>
+            </div>
+            <span class="doc-row-tag tag tag-gold">Review</span>
+          </div>
+          <div class="doc-row">
+            <div class="doc-row-icon"><i class="bi bi-clipboard2-pulse"></i></div>
+            <div>
+              <div class="doc-row-name">Discharge Summary — Dec 2024</div>
+              <div class="doc-row-meta">Uploaded 4 months ago</div>
+            </div>
+            <span class="doc-row-tag tag tag-green">Done</span>
+          </div>
+          <div class="doc-row">
+            <div class="doc-row-icon"><i class="bi bi-capsule"></i></div>
+            <div>
+              <div class="doc-row-name">Rx — Levothyroxine 75mcg</div>
+              <div class="doc-row-meta">Uploaded 6 months ago</div>
+            </div>
+            <span class="doc-row-tag tag tag-green">Done</span>
+          </div>
+
+          <div style="margin-top:1rem; padding-top:.8rem; border-top:1px solid var(--border);">
+            <div class="card-label" style="margin-bottom:.6rem;">Upcoming Screenings</div>
+            <div class="screening-row">
+              <div class="screening-icon" style="background:var(--gold-lt); color:var(--gold);">
+                <i class="bi bi-calendar-check"></i>
+              </div>
+              <div>
+                <div class="screening-name">Colonoscopy</div>
+                <div class="screening-due">Due 2026</div>
+              </div>
+              <span class="screening-badge tag tag-gold">Due soon</span>
+            </div>
+            <div class="screening-row">
+              <div class="screening-icon" style="background:var(--blue-lt); color:var(--blue);">
+                <i class="bi bi-droplet"></i>
+              </div>
+              <div>
+                <div class="screening-name">TSH Repeat</div>
+                <div class="screening-due">Overdue — last 11 months ago</div>
+              </div>
+              <span class="screening-badge tag tag-red">Overdue</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ─── UPLOAD ─── -->
+    <div class="screen" id="screen-upload">
+      <div>
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);margin-bottom:.5rem;font-family:'JetBrains Mono',monospace;">Upload Document</div>
+        <h2 style="font-size:1.5rem; margin-bottom:.3rem;">Add a health document</h2>
+        <p style="color:var(--ink3); font-size:.88rem;">Lab results, discharge summaries, prescriptions, EOBs, imaging reports — Phármakon extracts and structures everything automatically.</p>
+      </div>
+
+      <div class="upload-area" id="uploadArea" onclick="triggerUpload()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDrop(event)">
+        <input type="file" class="upload-file-input" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFile(this.files[0])"/>
+        <div class="upload-area-icon"><i class="bi bi-cloud-upload"></i></div>
+        <h3>Drop your document here</h3>
+        <p style="margin-top:.4rem;"><strong>Click to browse</strong> or drag and drop<br/>PDF, JPG, PNG — up to 25MB</p>
+      </div>
+
+      <div class="processing-card" id="processingCard">
+        <div class="proc-header">
+          <div class="proc-file-icon"><i class="bi bi-file-earmark-bar-graph"></i></div>
+          <div>
+            <div class="proc-filename" id="procFilename">LabResults_March2026.pdf</div>
+            <div class="proc-filesize" id="procFilesize">2.4 MB · PDF</div>
+          </div>
+          <div class="proc-status extracting" id="procStatus">Extracting…</div>
+        </div>
+        <div class="proc-bar-wrap">
+          <div class="proc-bar"><div class="proc-bar-fill" id="procBar"></div></div>
+        </div>
+        <div class="extraction-grid" id="extractionGrid"></div>
+      </div>
+
+      <div class="upload-complete-card" id="uploadComplete">
+        <div class="complete-icon"><i class="bi bi-check-lg"></i></div>
+        <div>
+          <div class="complete-title">Document processed — profile updated</div>
+          <div class="complete-body">9 data points extracted and written to your profile. TSH value flagged for review.</div>
+        </div>
+        <button class="btn-view-profile" onclick="showScreen('dashboard', document.querySelector('[onclick*=dashboard]'))">
+          View Dashboard
+        </button>
+      </div>
+    </div>
+
+    <!-- ─── CHAT ─── -->
+    <div class="screen" id="screen-chat">
+      <div class="chat-layout" style="flex:1;min-height:0;">
+
+        <!-- Context sidebar -->
+        <div class="chat-sidebar-card">
+          <div class="chat-ctx-label">Your Context</div>
+          <div class="chat-ctx-item"><span class="chat-ctx-key">Conditions</span><span class="chat-ctx-val">2 active</span></div>
+          <div class="chat-ctx-item"><span class="chat-ctx-key">Medications</span><span class="chat-ctx-val">2 current</span></div>
+          <div class="chat-ctx-item"><span class="chat-ctx-key">Labs on file</span><span class="chat-ctx-val">5 values</span></div>
+          <div class="chat-ctx-item"><span class="chat-ctx-key">Documents</span><span class="chat-ctx-val">12 total</span></div>
+          <div class="chat-ctx-item"><span class="chat-ctx-key">Last TSH</span><span class="chat-ctx-val" style="color:var(--gold);">5.2 High</span></div>
+          <div class="chat-ctx-item"><span class="chat-ctx-key">Ferritin</span><span class="chat-ctx-val" style="color:var(--red);">18 Low</span></div>
+
+          <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);">
+            <div class="chat-ctx-label" style="margin-bottom:.6rem;">Suggested questions</div>
+            <div style="display:flex;flex-direction:column;gap:.4rem;">
+              <div class="suggested-q" onclick="askQ('Why do I keep feeling exhausted?')">Why am I so tired?</div>
+              <div class="suggested-q" onclick="askQ('Is my Levothyroxine dose still appropriate given my TSH?')">Is my dose right?</div>
+              <div class="suggested-q" onclick="askQ('What screenings am I due for?')">Screenings due?</div>
+              <div class="suggested-q" onclick="askQ('Can you summarize my health status?')">Health summary</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat main -->
+        <div class="chat-main">
+          <div class="chat-header">
+            <div class="chat-ai-av">P</div>
+            <div>
+              <div class="chat-ai-name">Phármakon AI</div>
+              <div class="chat-ai-sub">Responds based on your personal health record</div>
+            </div>
+            <div style="margin-left:auto;" class="tag tag-green"><i class="bi bi-circle-fill me-1" style="font-size:.5rem;"></i>Active</div>
+          </div>
+
+          <div class="chat-messages" id="chatMessages">
+            <div class="msg">
+              <div class="msg-av ai">P</div>
+              <div class="msg-bub ai">Hello Jordan. I have your full health record in context — 5 years of data, 12 documents, and your current lab values. What would you like to know about your health today?</div>
+            </div>
+          </div>
+
+          <div class="chat-input-area">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Ask about your health…" onkeydown="if(event.key==='Enter') sendChat()"/>
+            <button class="btn-send" onclick="sendChat()"><i class="bi bi-arrow-up"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SUMMARY ─── -->
+    <div class="screen" id="screen-summary">
+      <div class="summary-layout">
+
+        <!-- Document -->
+        <div class="summary-doc">
+          <div class="summary-doc-header">
+            <div>
+              <div class="summary-doc-title">Pre-Visit Summary</div>
+              <div class="summary-doc-sub">Jordan Alvarez · Generated April 23, 2026 · For provider use</div>
+            </div>
+            <span class="tag tag-green" style="background:rgba(11,143,110,.2);color:#6EE7B7;">Ready</span>
+          </div>
+          <div class="summary-doc-body">
+
+            <div class="sum-section">
+              <div class="sum-section-title">Patient Information</div>
+              <div class="sum-row"><span class="sum-key">Full Name</span><span class="sum-val">Jordan Alvarez</span></div>
+              <div class="sum-row"><span class="sum-key">Date of Birth</span><span class="sum-val">March 14, 1989</span></div>
+              <div class="sum-row"><span class="sum-key">Age</span><span class="sum-val">36</span></div>
+              <div class="sum-row"><span class="sum-key">Insurance</span><span class="sum-val">Blue Cross PPO</span></div>
+              <div class="sum-row"><span class="sum-key">Primary Care</span><span class="sum-val">Dr. Maria Chen, MD</span></div>
+            </div>
+
+            <div class="sum-section">
+              <div class="sum-section-title">Active Conditions</div>
+              <div class="sum-row"><span class="sum-key">Hypothyroidism</span><span class="sum-val">Since Jan 2020</span></div>
+              <div class="sum-row"><span class="sum-key">GERD</span><span class="sum-val">Since Aug 2022</span></div>
+            </div>
+
+            <div class="sum-section">
+              <div class="sum-section-title">Current Medications</div>
+              <div class="sum-row"><span class="sum-key">Levothyroxine</span><span class="sum-val">75mcg · Once daily</span></div>
+              <div class="sum-row"><span class="sum-key">Omeprazole</span><span class="sum-val">20mg · As needed</span></div>
+            </div>
+
+            <div class="sum-section">
+              <div class="sum-section-title">Allergies</div>
+              <div class="sum-row"><span class="sum-key">Sulfa drugs</span><span class="sum-val" style="color:var(--red);">Rash — Severe</span></div>
+            </div>
+
+            <div class="sum-section">
+              <div class="sum-section-title">Recent Lab Values</div>
+              <div class="sum-row"><span class="sum-key">TSH</span><span class="sum-val" style="color:var(--gold);">5.2 mIU/L · Elevated ↑</span></div>
+              <div class="sum-row"><span class="sum-key">Ferritin</span><span class="sum-val" style="color:var(--red);">18 ng/mL · Low ↓</span></div>
+              <div class="sum-row"><span class="sum-key">HbA1c</span><span class="sum-val" style="color:var(--green);">5.4% · Normal</span></div>
+              <div class="sum-row"><span class="sum-key">Vitamin D</span><span class="sum-val" style="color:var(--green);">38 ng/mL · Normal</span></div>
+              <div class="sum-row"><span class="sum-key">Hemoglobin</span><span class="sum-val" style="color:var(--green);">12.8 g/dL · Normal</span></div>
+            </div>
+
+            <div class="sum-section">
+              <div class="sum-section-title">Today's Concerns — Patient Reported</div>
+              <div class="concern-item">
+                <div class="concern-dot high"></div>
+                <div class="concern-text">Persistent fatigue — ongoing for 6 months, reported 14 times in logs</div>
+                <span class="concern-priority tag tag-red">Priority</span>
+              </div>
+              <div class="concern-item">
+                <div class="concern-dot medium"></div>
+                <div class="concern-text">TSH trending up — potential Levothyroxine dose review needed</div>
+                <span class="concern-priority tag tag-gold">Review</span>
+              </div>
+              <div class="concern-item">
+                <div class="concern-dot medium"></div>
+                <div class="concern-text">Ferritin below optimal — possible iron supplementation discussion</div>
+                <span class="concern-priority tag tag-gold">Review</span>
+              </div>
+            </div>
+
+            <div class="sum-section">
+              <div class="sum-section-title">Screenings Due</div>
+              <div class="sum-row"><span class="sum-key">Colonoscopy</span><span class="sum-val" style="color:var(--gold);">Due 2026 — not yet scheduled</span></div>
+              <div class="sum-row"><span class="sum-key">TSH Repeat</span><span class="sum-val" style="color:var(--red);">Overdue — last tested 11 months ago</span></div>
+            </div>
+
+            <div style="margin-top:1.5rem; padding:1rem; background:var(--bg); border-radius:var(--r-sm); font-size:.75rem; color:var(--ink3); line-height:1.6;">
+              <strong style="color:var(--ink);">Phármakon Notice:</strong> This summary was generated by AI from patient-provided records and is intended to assist clinical conversations, not replace clinical judgment. All values should be verified against original source documents.
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Actions sidebar -->
+        <div class="summary-actions-card">
+          <div class="card-label" style="margin-bottom:.9rem;">Actions</div>
+          <button class="btn-action primary"><i class="bi bi-download"></i> Download PDF</button>
+          <button class="btn-action secondary"><i class="bi bi-printer"></i> Print Summary</button>
+          <button class="btn-action secondary"><i class="bi bi-link-45deg"></i> Copy Share Link</button>
+
+          <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);">
+            <div class="card-label" style="margin-bottom:.6rem;">Share with provider</div>
+            <p style="font-size:.78rem; color:var(--ink3); margin-bottom:.8rem; line-height:1.5;">Send directly to your care team before your visit.</p>
+            <input class="form-input" style="margin-bottom:.6rem; font-size:.82rem;" placeholder="Provider email address"/>
+            <button class="btn-action primary" style="margin:0;"><i class="bi bi-send"></i> Send Summary</button>
+          </div>
+
+          <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);">
+            <div class="card-label" style="margin-bottom:.6rem;">Summary details</div>
+            <div style="font-size:.78rem; color:var(--ink3); display:flex; flex-direction:column; gap:.3rem;">
+              <div style="display:flex; justify-content:space-between;"><span>Generated</span><span style="color:var(--ink); font-weight:600;">Apr 23, 2026</span></div>
+              <div style="display:flex; justify-content:space-between;"><span>Data points</span><span style="color:var(--ink); font-weight:600;">24</span></div>
+              <div style="display:flex; justify-content:space-between;"><span>Sources</span><span style="color:var(--ink); font-weight:600;">12 documents</span></div>
+              <div style="display:flex; justify-content:space-between;"><span>Valid for</span><span style="color:var(--ink); font-weight:600;">30 days</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ─── PROFILE ─── -->
+    <div class="screen" id="screen-profile">
+      <div class="profile-two-col">
+
+        <div class="profile-id-card">
+          <div class="profile-id-top">
+            <div class="profile-big-av">JA</div>
+            <div class="profile-id-name">Jordan Alvarez</div>
+            <div class="profile-id-sub">Patient since January 2021</div>
+            <div class="profile-id-stats">
+              <div class="profile-id-stat">
+                <div class="profile-id-stat-num">5</div>
+                <div class="profile-id-stat-label">Years</div>
+              </div>
+              <div class="profile-id-stat">
+                <div class="profile-id-stat-num">12</div>
+                <div class="profile-id-stat-label">Docs</div>
+              </div>
+              <div class="profile-id-stat">
+                <div class="profile-id-stat-num">4</div>
+                <div class="profile-id-stat-label">Providers</div>
+              </div>
+            </div>
+          </div>
+          <div class="profile-id-body">
+            <div class="profile-field"><span class="profile-field-key">Date of Birth</span><span class="profile-field-val">March 14, 1989</span></div>
+            <div class="profile-field"><span class="profile-field-key">Age</span><span class="profile-field-val">36</span></div>
+            <div class="profile-field"><span class="profile-field-key">Sex</span><span class="profile-field-val">Female</span></div>
+            <div class="profile-field"><span class="profile-field-key">Blood Type</span><span class="profile-field-val">A+</span></div>
+            <div class="profile-field"><span class="profile-field-key">Location</span><span class="profile-field-val">Atlanta, GA</span></div>
+            <div class="profile-field"><span class="profile-field-key">Insurance</span><span class="profile-field-val">Blue Cross PPO</span></div>
+            <div class="profile-field"><span class="profile-field-key">Primary Care</span><span class="profile-field-val">Dr. Maria Chen</span></div>
+            <div class="profile-field"><span class="profile-field-key">Allergies</span><span class="profile-field-val" style="color:var(--red);">Sulfa drugs</span></div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:1.2rem;">
+
+          <div class="card profile-section">
+            <div class="card-label">Active Conditions</div>
+            <div class="sum-row"><span class="sum-key">Hypothyroidism</span><span class="sum-val"><span class="tag tag-blue">Active</span></span></div>
+            <div class="sum-row"><span class="sum-key">GERD</span><span class="sum-val"><span class="tag tag-blue">Active</span></span></div>
+            <div class="sum-row"><span class="sum-key">Iron Deficiency</span><span class="sum-val"><span class="tag tag-gold">Suspected</span></span></div>
+          </div>
+
+          <div class="card profile-section">
+            <div class="card-label">Current Medications</div>
+            <div class="sum-row">
+              <span class="sum-key">Levothyroxine 75mcg</span>
+              <span class="sum-val">Daily · Since Jan 2023</span>
+            </div>
+            <div class="sum-row">
+              <span class="sum-key">Omeprazole 20mg</span>
+              <span class="sum-val">As needed · Since Aug 2022</span>
+            </div>
+          </div>
+
+          <div class="card profile-section">
+            <div class="card-label">Family History</div>
+            <div class="sum-row"><span class="sum-key">Type 2 Diabetes</span><span class="sum-val">Mother, age 58</span></div>
+            <div class="sum-row"><span class="sum-key">Hypothyroidism</span><span class="sum-val">Maternal aunt</span></div>
+            <div class="sum-row"><span class="sum-key">Colorectal Cancer</span><span class="sum-val">Grandfather, age 71</span></div>
+          </div>
+
+          <div class="card profile-section">
+            <div class="card-label">Provider History</div>
+            <div class="sum-row"><span class="sum-key">Dr. Maria Chen, MD</span><span class="sum-val">Primary Care · Emory</span></div>
+            <div class="sum-row"><span class="sum-key">Dr. Kevin Park, MD</span><span class="sum-val">Endocrinology · Piedmont</span></div>
+            <div class="sum-row"><span class="sum-key">Dr. Lisa Torres, MD</span><span class="sum-val">Gastroenterology · Emory</span></div>
+            <div class="sum-row"><span class="sum-key">Northside Urgent Care</span><span class="sum-val">Walk-in · Dec 2024</span></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  .suggested-q {
+    font-size:.75rem; color:var(--blue); font-weight:600;
+    padding:.4rem .65rem; background:var(--blue-lt);
+    border-radius:var(--r-sm); cursor:pointer;
+    transition:background .15s;
+    line-height:1.4;
+  }
+  .suggested-q:hover { background:var(--blue-mid); }
+</style>
+
+<!-- ═══════════ DEMO LAUNCHER ═══════════ -->
+<div id="demoLauncher">
+  <div class="demo-launch-logo">
+    <div class="demo-launch-icon"><i class="bi bi-heart-pulse-fill"></i></div>
+    <div class="demo-launch-name">Phármakon</div>
+  </div>
+  <div class="demo-launch-label">Product Demo</div>
+  <div class="demo-launch-title">Your health,<br/>finally remembered.</div>
+  <div class="demo-launch-sub">Watch how Phármakon builds a living health profile, interprets your records, and prepares you for every appointment.</div>
+  <button class="btn-start-demo" onclick="startDemo()">
+    <i class="bi bi-play-fill"></i> Start Demo
+  </button>
+  <div class="demo-launch-duration">90 seconds &nbsp;·&nbsp; No interaction needed</div>
+</div>
+
+<!-- Demo UI chrome -->
+<div id="demoProgress"><div id="demoProgressFill"></div></div>
+<div id="chapterLabel"></div>
+<div id="demoCursor">
+  <div class="cursor-dot">
+    <div class="cursor-ring"></div>
+    <div class="cursor-click" id="cursorClick"></div>
+  </div>
+</div>
+
+<!-- End card -->
+<div id="demoEndCard">
+  <div class="end-card-icon"><i class="bi bi-heart-pulse-fill"></i></div>
+  <div class="end-card-name">Phármakon</div>
+  <div class="end-card-tagline">Your health, finally remembered.</div>
+  <div class="end-card-tag" style="margin-top:1.2rem;">Join the waitlist at pharmakon.netlify.app</div>
+  <button class="btn-replay" onclick="replayDemo()">
+    <i class="bi bi-arrow-counterclockwise"></i> Replay demo
+  </button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+
+  // ── LOGIN ────────────────────────────────────────
+  function doLogin() {
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    setTimeout(animateLabs, 400);
+  }
+
+  // ── NAVIGATION ───────────────────────────────────
+  const screenMeta = {
+    dashboard: { title:'Dashboard', sub:'Thursday, April 23, 2026' },
+    upload:    { title:'Upload Document', sub:'Add a new health document to your profile' },
+    chat:      { title:'Ask Phármakon', sub:'AI answers grounded in your personal health record' },
+    summary:   { title:'Pre-Visit Summary', sub:'Ready for your next appointment' },
+    profile:   { title:'My Profile', sub:'Your complete health record' },
+  };
+
+  function showScreen(id, el) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item-s').forEach(n => n.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+    if (el) el.classList.add('active');
+    const meta = screenMeta[id];
+    if (meta) {
+      document.getElementById('topbar-title').textContent = meta.title;
+      document.getElementById('topbar-sub').textContent   = meta.sub;
+    }
+    if (id === 'dashboard') animateLabs();
+    if (id === 'upload') resetUpload();
+  }
+
+  // ── LAB BARS ─────────────────────────────────────
+  function animateLabs() {
+    document.querySelectorAll('.lab-fill-d').forEach(b => {
+      b.style.width = '0';
+      setTimeout(() => { b.style.width = (b.dataset.w || 50) + '%'; }, 100);
+    });
+  }
+
+  // ── UPLOAD FLOW ──────────────────────────────────
+  function triggerUpload() { document.getElementById('fileInput').click(); }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('uploadArea').classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) startProcessing(file.name, formatSize(file.size));
+    else startProcessing('LabResults_March2026.pdf', '2.4 MB');
+  }
+
+  function handleFile(file) {
+    if (file) startProcessing(file.name, formatSize(file.size));
+  }
+
+  function formatSize(bytes) {
+    if (!bytes) return '2.4 MB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  function resetUpload() {
+    document.getElementById('uploadArea').style.display = '';
+    document.getElementById('processingCard').classList.remove('show');
+    document.getElementById('uploadComplete').classList.remove('show');
+    document.getElementById('extractionGrid').innerHTML = '';
+    document.getElementById('procBar').style.width = '0';
+    document.getElementById('procStatus').className = 'proc-status extracting';
+    document.getElementById('procStatus').textContent = 'Extracting…';
+  }
+
+  const extractedFields = [
+    { label:'Patient Name',   value:'Jordan Alvarez',    highlight:false },
+    { label:'Test Date',      value:'March 18, 2026',    highlight:false },
+    { label:'Ordering MD',    value:'Dr. Maria Chen',    highlight:false },
+    { label:'TSH',            value:'5.2 mIU/L ↑',       highlight:true  },
+    { label:'Ferritin',       value:'18 ng/mL ↓',        highlight:true  },
+    { label:'HbA1c',          value:'5.4%',               highlight:false },
+    { label:'Vitamin D',      value:'38 ng/mL',           highlight:false },
+    { label:'Hemoglobin',     value:'12.8 g/dL',          highlight:false },
+    { label:'Lab Facility',   value:'Quest Diagnostics',  highlight:false },
+  ];
+
+  function startProcessing(filename, filesize) {
+    document.getElementById('uploadArea').style.display = 'none';
+    const card = document.getElementById('processingCard');
+    card.classList.add('show');
+    document.getElementById('procFilename').textContent = filename || 'LabResults_March2026.pdf';
+    document.getElementById('procFilesize').textContent = (filesize || '2.4 MB') + ' · PDF';
+
+    const bar = document.getElementById('procBar');
+    const grid = document.getElementById('extractionGrid');
+    const status = document.getElementById('procStatus');
+
+    // Animate progress bar
+    let progress = 0;
+    const barInterval = setInterval(() => {
+      progress = Math.min(progress + Math.random() * 12, 95);
+      bar.style.width = progress + '%';
+      if (progress >= 95) clearInterval(barInterval);
+    }, 200);
+
+    // Show extraction fields one by one
+    extractedFields.forEach((field, i) => {
+      setTimeout(() => {
+        const el = document.createElement('div');
+        el.className = 'ext-item';
+        el.innerHTML = `
+          <div class="ext-label">${field.label}</div>
+          <div class="ext-value${field.highlight ? ' highlight' : ''}">${field.value}</div>
+        `;
+        grid.appendChild(el);
+        setTimeout(() => el.classList.add('appear'), 30);
+      }, 600 + i * 280);
+    });
+
+    // Complete
+    setTimeout(() => {
+      clearInterval(barInterval);
+      bar.style.width = '100%';
+      status.className = 'proc-status done';
+      status.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Done';
+      document.getElementById('uploadComplete').classList.add('show');
+    }, 600 + extractedFields.length * 280 + 400);
+  }
+
+  // ── CHAT ─────────────────────────────────────────
+  const patientContext = `You are Phármakon, an AI health assistant. You are speaking with Jordan Alvarez, a 36-year-old female patient. You have access to her complete health record:
+
+ACTIVE CONDITIONS: Hypothyroidism (since Jan 2020), GERD (since Aug 2022)
+CURRENT MEDICATIONS: Levothyroxine 75mcg daily (since Jan 2023), Omeprazole 20mg as needed
+ALLERGIES: Sulfa drugs (severe rash)
+RECENT LABS: TSH 5.2 mIU/L (elevated, normal 0.4-4.0), Ferritin 18 ng/mL (low, optimal 20-200), HbA1c 5.4% (normal), Vitamin D 38 ng/mL (normal), Hemoglobin 12.8 g/dL (normal)
+FAMILY HISTORY: Mother - Type 2 diabetes; Maternal aunt - Hypothyroidism; Grandfather - Colorectal cancer
+PROVIDERS: Dr. Maria Chen (PCP, Emory), Dr. Kevin Park (Endocrinology, Piedmont), Dr. Lisa Torres (Gastroenterology, Emory)
+SYMPTOM LOGS: Fatigue reported 14 times in past 6 months
+SCREENINGS DUE: Colonoscopy (due 2026), TSH repeat (overdue, last 11 months ago)
+
+CRITICAL INSTRUCTIONS:
+- Always reference Jordan's specific data points when answering
+- Never diagnose — observe, surface patterns, and recommend discussing with her provider
+- Keep responses concise (3-5 sentences max)
+- Be warm but clinical
+- Always mention relevant lab values or history when applicable
+- End with a clear next step suggestion`;
+
+  let chatHistory = [];
+
+  async function sendChat() {
+    const input = document.getElementById('chatInput');
+    const val = input.value.trim();
+    if (!val) return;
+    input.value = '';
+    askQ(val);
+  }
+
+  async function askQ(question) {
+    addMsg('user', question);
+    const typingId = addTyping();
+
+    chatHistory.push({ role:'user', content: question });
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({
+          model:'claude-sonnet-4-20250514',
+          max_tokens:1000,
+          system: patientContext,
+          messages: chatHistory,
+        })
+      });
+
+      const data = await res.json();
+      const reply = data.content?.[0]?.text || getFallback(question);
+      removeTyping(typingId);
+      addMsg('ai', reply);
+      chatHistory.push({ role:'assistant', content: reply });
+
+    } catch(e) {
+      removeTyping(typingId);
+      addMsg('ai', getFallback(question));
+    }
+  }
+
+  function getFallback(q) {
+    const ql = q.toLowerCase();
+    if (ql.includes('tired') || ql.includes('exhaust') || ql.includes('fatigue')) {
+      return "Based on your record, three things stand out: your <strong>TSH has risen from 3.1 → 5.2</strong> over 18 months, your <strong>ferritin is at 18</strong> (below optimal for your age), and you've logged fatigue 14 times in the past 6 months. These three factors together strongly suggest your thyroid dose may need review and iron stores should be assessed. I'd recommend raising both with Dr. Chen at your next visit — a pre-visit summary connecting these findings is ready.";
+    }
+    if (ql.includes('levothyroxine') || ql.includes('dose') || ql.includes('thyroid')) {
+      return "Your current Levothyroxine dose is <strong>75mcg daily</strong>, started January 2023. Given that your TSH has climbed to <strong>5.2</strong> (above the normal ceiling of 4.0) and you have been reporting persistent fatigue, your dose may be insufficient. Your last endocrinology visit with Dr. Park was over 11 months ago — a TSH repeat and dose review would be the appropriate next step.";
+    }
+    if (ql.includes('screening') || ql.includes('due')) {
+      return "Based on your profile, you have two overdue items. Your <strong>TSH repeat</strong> is overdue — your last test was 11 months ago and your value is elevated. Your <strong>colonoscopy</strong> is due in 2026 given your grandfather's history of colorectal cancer, which puts you in a higher-risk category for earlier screening. I'd recommend scheduling both with Dr. Chen.";
+    }
+    if (ql.includes('summary') || ql.includes('status') || ql.includes('overall')) {
+      return "Your overall health profile shows two well-managed chronic conditions with one active concern. Your <strong>GERD and diabetes risk markers</strong> (HbA1c 5.4%) look stable. The primary active concern is your <strong>thyroid status</strong> — TSH at 5.2 combined with low ferritin and persistent fatigue suggests a medication review is needed. A full pre-visit summary is ready for your next appointment.";
+    }
+    return "Based on your health record, I can help you understand that pattern better. Your current data shows your TSH at <strong>5.2</strong> and ferritin at <strong>18</strong> — both worth discussing at your next appointment. Would you like me to generate a pre-visit summary connecting your current concerns?";
+  }
+
+  function addMsg(role, html) {
+    const messages = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = `msg ${role} fade-in`;
+    div.innerHTML = `
+      <div class="msg-av ${role}">${role === 'ai' ? 'P' : 'JA'}</div>
+      <div class="msg-bub ${role}">${html}</div>
+    `;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+    return div;
+  }
+
+  function addTyping() {
+    const messages = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = 'msg fade-in';
+    div.id = 'typing-' + Date.now();
+    div.innerHTML = `
+      <div class="msg-av ai">P</div>
+      <div class="typing-bub">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+    `;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+    return div.id;
+  }
+
+  function removeTyping(id) {
+    document.getElementById(id)?.remove();
+  }
+
+  // Init — autoplay demo immediately, no launcher interaction needed
+  window.onload = () => {
+    // Hide launcher instantly — no button needed
+    const launcher = document.getElementById('demoLauncher');
+    launcher.style.display = 'none';
+
+    // Hide login and app until demo sequence reveals them
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('app').classList.add('hidden');
+
+    // Show a clean branded hold screen for 2s before demo begins
+    const hold = document.createElement('div');
+    hold.id = 'holdScreen';
+    hold.style.cssText = `
+      position:fixed; inset:0; z-index:8900;
+      background:var(--ink);
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:1rem;
+      transition:opacity .8s ease;
+    `;
+    hold.innerHTML = `
+      <div style="display:flex;align-items:center;gap:.7rem;">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;">
+          <i class="bi bi-heart-pulse-fill"></i>
+        </div>
+        <div style="font-family:'Instrument Serif',serif;font-size:2rem;color:white;letter-spacing:-.03em;">Phármakon</div>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.35);">Your health, finally remembered.</div>
+    `;
+    document.body.appendChild(hold);
+
+    // Fade out hold screen and begin demo
+    setTimeout(() => {
+      hold.style.opacity = '0';
+      setTimeout(() => {
+        hold.remove();
+        startDemo();
+      }, 800);
+    }, 2200);
+  };
+
+  // ── DEMO ENGINE ──────────────────────────────────
+
+  const cursor   = document.getElementById('demoCursor');
+  const progress = document.getElementById('demoProgressFill');
+  const chapter  = document.getElementById('chapterLabel');
+
+  // Move cursor to element, optionally click it
+  function moveTo(selector, clickAfter = true, delay = 600) {
+    return new Promise(resolve => {
+      const el = typeof selector === 'string'
+        ? document.querySelector(selector)
+        : selector;
+      if (!el) { resolve(); return; }
+
+      const rect = el.getBoundingClientRect();
+      const x = rect.left + rect.width  / 2;
+      const y = rect.top  + rect.height / 2;
+
+      cursor.style.left = x - 12 + 'px';
+      cursor.style.top  = y - 12 + 'px';
+      cursor.style.display = 'block';
+
+      setTimeout(() => {
+        if (clickAfter) {
+          const cc = document.getElementById('cursorClick');
+          cc.classList.add('pulse');
+          setTimeout(() => { cc.classList.remove('pulse'); resolve(); }, 220);
+        } else {
+          resolve();
+        }
+      }, delay);
+    });
+  }
+
+  // Type text into an input character by character
+  function typeInto(selector, text, speed = 55) {
+    return new Promise(resolve => {
+      const el = document.querySelector(selector);
+      if (!el) { resolve(); return; }
+      el.value = '';
+      el.focus();
+      let i = 0;
+      const t = setInterval(() => {
+        el.value += text[i++];
+        if (i >= text.length) { clearInterval(t); setTimeout(resolve, 300); }
+      }, speed);
+    });
+  }
+
+  // Show chapter label
+  function showChapter(text, progressPct) {
+    chapter.textContent = text;
+    chapter.style.display = 'block';
+    chapter.style.opacity = '1';
+    progress.style.width = progressPct + '%';
+  }
+
+  // Pause
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+
+  // Highlight element briefly
+  function highlight(selector) {
+    const el = document.querySelector(selector);
+    if (!el) return;
+    el.classList.add('demo-highlight');
+    setTimeout(() => el.classList.remove('demo-highlight'), 1200);
+  }
+
+  // Scroll element smoothly
+  function scrollTo(selector, top) {
+    const el = document.querySelector(selector);
+    if (el) el.scrollTo({ top, behavior:'smooth' });
+  }
+
+  // ── MAIN DEMO SEQUENCE ───────────────────────────
+  async function startDemo() {
+    // Hide launcher
+    document.getElementById('demoLauncher').classList.add('hide');
+    document.getElementById('demoProgress').style.display = 'block';
+    await wait(600);
+
+    // ── STEP 1: LOGIN ─────────────────────────────
+    showChapter('01 · Sign In', 5);
+    document.getElementById('login').classList.remove('hidden');
+    await wait(800);
+
+    // Move to email, type
+    await moveTo('#loginEmail', false, 500);
+    await typeInto('#loginEmail', 'jordan@example.com', 48);
+
+    // Move to password
+    await moveTo('#loginPass', false, 400);
+    await typeInto('#loginPass', '••••••••', 80);
+    await wait(400);
+
+    // Click sign in
+    await moveTo('.btn-login', true, 500);
+    await wait(200);
+    document.getElementById('login').classList.add('hidden');
+    cursor.style.display = 'none';
+    await wait(500);
+
+    // ── STEP 2: DASHBOARD ────────────────────────
+    showChapter('02 · Dashboard', 22);
+    document.getElementById('app').classList.remove('hidden');
+    await wait(300);
+    animateLabs();
+    await wait(1200);
+
+    // Highlight insight
+    highlight('.insight-alert');
+    await moveTo('.insight-alert', false, 800);
+    await wait(2200);
+
+    // Hover lab section
+    await moveTo('#dashLabs', false, 600);
+    await wait(1000);
+
+    // Auto-scroll down to reveal documents and screenings cards
+    const mainArea = document.querySelector('.main-area');
+    for (let s = 0; s <= 320; s += 40) {
+      await wait(180);
+      if (mainArea) mainArea.scrollTo({ top: s, behavior: 'smooth' });
+    }
+    await wait(2400);
+
+    // Scroll back to top before leaving
+    if (mainArea) mainArea.scrollTo({ top: 0, behavior: 'smooth' });
+    await wait(600);
+
+    // ── STEP 3: UPLOAD ───────────────────────────
+    showChapter('03 · Document Upload', 42);
+    const uploadNav = document.querySelector('[onclick*="upload"]');
+    await moveTo(uploadNav, true, 700);
+    await wait(200);
+    showScreen('upload', uploadNav);
+    await wait(800);
+
+    // Hover upload zone
+    await moveTo('#uploadArea', false, 600);
+    await wait(500);
+
+    // Trigger drag-over effect then start processing
+    const ua = document.getElementById('uploadArea');
+    ua.classList.add('drag-over');
+    await wait(600);
+    ua.classList.remove('drag-over');
+    await wait(200);
+    startProcessing('LabResults_March2026.pdf', '2.4 MB');
+
+    // Watch extraction play out
+    cursor.style.display = 'none';
+    await wait(1000);
+
+    // Scroll extraction grid into view as items appear
+    for (let i = 0; i < 4; i++) {
+      await wait(900);
+      scrollTo('#screen-upload', 200 + i * 60);
+    }
+
+    // Wait for complete card
+    await wait(7000);
+    highlight('#uploadComplete');
+    await wait(1400);
+
+    // ── STEP 4: CHAT ─────────────────────────────
+    showChapter('04 · Ask Phármakon', 65);
+    const chatNav = document.querySelector('[onclick*="chat"]');
+    await moveTo(chatNav, true, 700);
+    await wait(200);
+    showScreen('chat', chatNav);
+    await wait(700);
+
+    // Click suggested question chip
+    const chip = document.querySelector('.suggested-q');
+    await moveTo(chip, false, 600);
+    await wait(300);
+
+    // Type in input instead for visual effect
+    await moveTo('#chatInput', false, 400);
+    await typeInto('#chatInput', 'Why do I keep feeling exhausted?', 42);
+    await wait(300);
+
+    // Click send
+    await moveTo('.btn-send', true, 400);
+    await wait(200);
+
+    // Show user message bubble then typing indicator
+    document.getElementById('chatInput').value = '';
+    addMsg('user', 'Why do I keep feeling exhausted?');
+    const typingId = addTyping();
+    await wait(2400);
+    removeTyping(typingId);
+    addMsg('ai', "Based on your record, three things stand out: your <strong>TSH has risen from 3.1 → 5.2</strong> over 18 months, your <strong>ferritin is at 18</strong> (below optimal for your age), and you've logged fatigue <strong>14 times</strong> in the past 6 months. These factors together suggest your thyroid dose may need review and iron stores should be assessed. A pre-visit summary connecting all three is ready.");
+    cursor.style.display = 'none';
+    await wait(5200);
+
+    // Scroll chat to bottom
+    scrollTo('#chatMessages', 9999);
+    await wait(1400);
+
+    // ── STEP 5: SUMMARY ──────────────────────────
+    showChapter('05 · Pre-Visit Summary', 85);
+    const sumNav = document.querySelector('[onclick*="summary"]');
+    await moveTo(sumNav, true, 700);
+    await wait(200);
+    showScreen('summary', sumNav);
+    cursor.style.display = 'none';
+    await wait(1200);
+
+    // Scroll through summary document slowly and deliberately
+    // so every section is readable on screen
+    const summaryDoc = document.querySelector('.summary-doc');
+    if (summaryDoc) {
+      // Pause at top — patient info visible
+      await wait(1400);
+      // Scroll to conditions and medications
+      summaryDoc.scrollTo({ top: 180, behavior: 'smooth' });
+      await wait(1800);
+      // Scroll to lab values
+      summaryDoc.scrollTo({ top: 380, behavior: 'smooth' });
+      await wait(1800);
+      // Scroll to concerns and screenings
+      summaryDoc.scrollTo({ top: 580, behavior: 'smooth' });
+      await wait(1800);
+      // Scroll to bottom — disclaimer and end
+      summaryDoc.scrollTo({ top: 820, behavior: 'smooth' });
+      await wait(1600);
+    }
+
+    // Highlight download button
+    highlight('.btn-action.primary');
+    await moveTo('.btn-action.primary', false, 600);
+    await wait(1200);
+
+    // ── END CARD ─────────────────────────────────
+    progress.style.width = '100%';
+    chapter.style.opacity = '0';
+    cursor.style.display = 'none';
+    await wait(700);
+    document.getElementById('demoEndCard').classList.add('show');
+  }
+
+  function replayDemo() {
+    document.getElementById('demoEndCard').classList.remove('show');
+    document.getElementById('demoProgress').style.display = 'none';
+    chapter.style.display = 'none';
+    chapter.style.opacity = '1';
+    progress.style.width = '0%';
+    cursor.style.display = 'none';
+    document.getElementById('app').classList.add('hidden');
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('chatMessages').innerHTML = `
+      <div class="msg">
+        <div class="msg-av ai">P</div>
+        <div class="msg-bub ai">Hello Jordan. I have your full health record in context — 5 years of data, 12 documents, and your current lab values. What would you like to know about your health today?</div>
+      </div>`;
+    chatHistory = [];
+    resetUpload();
+    setTimeout(() => startDemo(), 600);
+  }
+</script>
+</body>
+</html>
