@@ -849,12 +849,9 @@
     if (!open) el.classList.add('open');
   }
 
-  // ─── LIVE COUNTER — auto-fetches from Kit via Netlify function ─
-  // Falls back to FALLBACK_COUNT if the function is unavailable.
-  // Update FALLBACK_COUNT manually to match your real Kit total
-  // until the Netlify function is deployed.
-
-  const FALLBACK_COUNT = 4; // ← matches current Kit total
+  // ─── LIVE COUNTER — Supabase via Vercel function ──────────
+  // Fetches real count on every page load. No fallback number.
+  // Counter is hidden until Supabase returns a real value.
 
   async function fetchLiveCount() {
     try {
@@ -862,13 +859,11 @@
       if (!res.ok) throw new Error('Function error');
       const data = await res.json();
       const count = data.count || 0;
-      if (count > 0) {
-        updateCounters(count);
-      } else {
-        updateCounters(FALLBACK_COUNT);
-      }
+      updateCounters(count);
     } catch (e) {
-      updateCounters(FALLBACK_COUNT);
+      // Hide counter if function unavailable
+      document.getElementById('heroCounter')?.style.setProperty('display','none');
+      document.getElementById('ctaCounter')?.style.setProperty('display','none');
     }
   }
 
