@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Phármakon — Your Health, Remembered</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --bg:       #FFFFFF;
+      --bg2:      #F7F9FC;
+      --ink:      #002677;
+      --ink2:     #1A3A6B;
+      --ink3:     #6B85A8;
+      --teal:     #196ECF;
+      --teal-lt:  #EDF4FF;
+      --teal-mid: #C4D9F0;
+      --gold:     #D47C0F;
+      --gold-lt:  #FEF3DC;
+      --red-lt:   #FEE9E9;
+      --red:      #D94040;
+      --border:   #DDE6F0;
+      --shadow:   0 2px 16px rgba(0,38,119,0.06);
+      --shadow-lg:0 8px 40px rgba(0,38,119,0.09);
+      --radius:   16px;
+      --radius-sm:10px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{background:var(--bg);color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;}
+    h1,h2,h3,h4{font-family:'Instrument Serif',serif;font-weight:400;line-height:1.12;letter-spacing:-0.02em;}
+    h1{font-size:clamp(2.5rem,5.5vw,4.4rem);}
+    h2{font-size:clamp(1.9rem,3.5vw,3rem);}
+    h3{font-size:clamp(1.2rem,2vw,1.55rem);}
+    .mono{font-family:'JetBrains Mono',monospace;}
+    .label-tag{font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:0.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);}
+
+    /* NAVBAR */
+    .navbar{background:rgba(255,255,255,.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--border);padding:.9rem 0;position:sticky;top:0;z-index:1000;}
+    .navbar-brand{font-family:'Instrument Serif',serif;font-size:1.4rem;color:var(--ink)!important;display:flex;align-items:center;gap:.5rem;letter-spacing:-.03em;}
+    .brand-icon{width:30px;height:30px;background:var(--ink);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:.85rem;}
+    .nav-link{font-size:.9rem;font-weight:500;color:var(--ink2)!important;padding:.35rem .9rem!important;transition:color .2s;}
+    .nav-link:hover{color:var(--ink)!important;}
+    .btn-cta{background:var(--ink);color:#fff!important;font-weight:600;font-size:.88rem;border-radius:100px;padding:.5rem 1.25rem!important;transition:opacity .2s,transform .15s;border:none;}
+    .btn-cta:hover{opacity:.85;transform:translateY(-1px);color:#fff!important;}
+
+    /* HERO */
+    #hero{padding:6rem 0 4rem;text-align:center;position:relative;overflow:hidden;}
+    .hero-bg-blob{position:absolute;width:800px;height:500px;background:radial-gradient(ellipse,rgba(25,110,207,.07) 0%,transparent 70%);top:-100px;left:50%;transform:translateX(-50%);pointer-events:none;}
+    .yc-badge{display:inline-flex;align-items:center;gap:.5rem;background:white;border:1px solid var(--border);border-radius:100px;padding:.35rem .9rem;font-size:.82rem;font-weight:600;color:var(--ink2);margin-bottom:1.8rem;box-shadow:var(--shadow);}
+    .yc-dot{width:18px;height:18px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:.6rem;font-weight:700;}
+    .hero-sub{font-size:1.1rem;color:var(--ink3);max-width:520px;margin:1.2rem auto 2.2rem;}
+    .btn-hero{background:var(--ink);color:white;font-weight:600;font-size:.95rem;border-radius:100px;padding:.85rem 2rem;border:none;transition:all .2s;display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;}
+    .btn-hero:hover{background:#001a55;color:white;transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,38,119,.25);}
+    .hero-note{font-size:.83rem;color:var(--ink3);margin-top:.9rem;}
+
+    /* PREVIEW */
+    .hero-preview{margin-top:3.5rem;}
+    .preview-shell{background:white;border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow-lg);overflow:hidden;max-width:860px;margin:0 auto;}
+    .preview-titlebar{background:var(--bg2);border-bottom:1px solid var(--border);padding:.8rem 1.2rem;display:flex;align-items:center;gap:.5rem;}
+    .tb-dot{width:11px;height:11px;border-radius:50%;}
+    .tb-dot.r{background:#FF5F57;}.tb-dot.y{background:#FFBD2E;}.tb-dot.g{background:#28C840;}
+    .tb-bar{flex:1;background:white;border:1px solid var(--border);border-radius:6px;padding:.25rem .75rem;font-size:.75rem;color:var(--ink3);margin:0 .5rem;font-family:'JetBrains Mono',monospace;}
+    .preview-body{display:grid;grid-template-columns:260px 1fr;min-height:320px;}
+    .preview-sidebar{border-right:1px solid var(--border);padding:1.2rem;background:var(--bg);}
+    .sidebar-profile{display:flex;align-items:center;gap:.7rem;padding-bottom:1rem;border-bottom:1px solid var(--border);margin-bottom:1rem;}
+    .s-avatar{width:38px;height:38px;border-radius:50%;background:var(--ink);color:white;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0;}
+    .s-name{font-weight:700;font-size:.88rem;color:var(--ink);}
+    .s-sub{font-size:.73rem;color:var(--ink3);}
+    .sidebar-row{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;padding:.4rem 0;border-bottom:1px solid var(--border);}
+    .sidebar-row:last-of-type{border:none;}
+    .s-key{color:var(--ink3);}
+    .s-val{font-weight:600;color:var(--ink);font-size:.75rem;}
+    .badge-teal{background:var(--teal-lt);color:var(--teal);border-radius:100px;padding:.15rem .55rem;font-size:.68rem;font-weight:700;}
+    .badge-gold{background:var(--gold-lt);color:var(--gold);border-radius:100px;padding:.15rem .55rem;font-size:.68rem;font-weight:700;}
+    .badge-red{background:var(--red-lt);color:var(--red);border-radius:100px;padding:.15rem .55rem;font-size:.68rem;font-weight:700;}
+    .preview-main{padding:1.4rem;}
+    .insight-card{background:var(--teal-lt);border:1px solid var(--teal-mid);border-radius:var(--radius-sm);padding:1rem 1.1rem;margin-bottom:1rem;}
+    .insight-header{display:flex;align-items:center;gap:.5rem;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--teal);margin-bottom:.5rem;}
+    .insight-card p{font-size:.82rem;color:var(--ink2);line-height:1.55;margin:0;}
+    .insight-card strong{color:var(--ink);}
+    .lab-mini-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);margin-bottom:.7rem;}
+    .lab-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;font-size:.75rem;}
+    .lab-name{width:55px;color:var(--ink3);font-family:'JetBrains Mono',monospace;}
+    .lab-track{flex:1;height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;}
+    .lab-fill{height:100%;border-radius:3px;transition:width 1.5s cubic-bezier(.22,1,.36,1);width:0;}
+    .lab-fill.ok{background:var(--teal);}
+    .lab-fill.warn{background:var(--gold);}
+    .lab-fill.bad{background:var(--red);}
+    .lab-num{width:36px;text-align:right;font-weight:700;font-family:'JetBrains Mono',monospace;}
+    .lab-num.ok{color:var(--teal);}
+    .lab-num.warn{color:var(--gold);}
+    .lab-num.bad{color:var(--red);}
+
+    /* SECTIONS */
+    section{padding:6rem 0;}
+    .section-label{margin-bottom:1rem;}
+
+    /* FEATURES — TAB SWITCHER */
+    #features{background:white;padding:6rem 0;}
+    .features-header{margin-bottom:3.5rem;}
+    .features-header h2{margin-top:.5rem;margin-bottom:.8rem;}
+    .features-header p{color:var(--ink3);font-size:.95rem;max-width:480px;}
+    .features-layout{display:grid;grid-template-columns:1fr 1.1fr;gap:3rem;align-items:start;}
+    .feat-tabs{display:flex;flex-direction:column;gap:0;}
+    .feat-tab{padding:1.4rem 1.5rem;border-left:2px solid var(--border);cursor:pointer;transition:border-color .2s,background .2s;border-radius:0 var(--radius-sm) var(--radius-sm) 0;}
+    .feat-tab:hover{background:var(--bg2);}
+    .feat-tab.active{border-left-color:var(--teal);background:var(--teal-lt);}
+    .feat-tab-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;color:var(--ink3);letter-spacing:.1em;margin-bottom:.35rem;transition:color .2s;}
+    .feat-tab.active .feat-tab-num{color:var(--teal);}
+    .feat-tab-title{font-weight:700;font-size:.98rem;color:var(--ink);margin-bottom:.4rem;}
+    .feat-tab-desc{font-size:.84rem;color:var(--ink3);line-height:1.6;max-height:0;overflow:hidden;transition:max-height .35s ease,opacity .3s;opacity:0;}
+    .feat-tab.active .feat-tab-desc{max-height:120px;opacity:1;}
+    .feat-tab-list{list-style:none;padding:0;margin:.8rem 0 0;max-height:0;overflow:hidden;transition:max-height .35s ease,opacity .3s;opacity:0;}
+    .feat-tab.active .feat-tab-list{max-height:200px;opacity:1;}
+    .feat-tab-list li{font-size:.82rem;color:var(--ink2);font-weight:500;display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem;}
+    .feat-tab-list li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--teal);flex-shrink:0;}
+    .feat-mockup-wrap{position:sticky;top:100px;}
+    .feat-panel{display:none;}
+    .feat-panel.active{display:block;animation:fadeUp .3s ease;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+    /* MOCKUP */
+    .mockup-card{background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);overflow:hidden;}
+    .mockup-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:.65rem 1rem;display:flex;align-items:center;gap:.4rem;}
+    .m-dot{width:9px;height:9px;border-radius:50%;}
+    .m-dot.r{background:#FF5F57;}.m-dot.y{background:#FFBD2E;}.m-dot.g{background:#28C840;}
+    .mockup-body{padding:1.2rem;}
+
+    /* Upload mockup */
+    .upload-zone{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:1.5rem;text-align:center;margin-bottom:1rem;cursor:pointer;transition:border-color .2s,background .2s;}
+    .upload-zone:hover{border-color:var(--teal);background:var(--teal-lt);}
+    .upload-icon{font-size:1.5rem;color:var(--ink3);margin-bottom:.5rem;}
+    .upload-label{font-size:.83rem;color:var(--ink3);}
+    .upload-label strong{color:var(--teal);}
+    .doc-item{display:flex;align-items:center;gap:.7rem;padding:.65rem .8rem;background:var(--bg2);border-radius:var(--radius-sm);margin-bottom:.5rem;font-size:.82rem;}
+    .doc-icon{font-size:1.05rem;color:var(--ink3);display:flex;align-items:center;}
+    .doc-name{font-weight:600;flex:1;color:var(--ink);}
+    .doc-status{font-size:.72rem;font-weight:700;}
+    .doc-status.done{color:var(--teal);}
+    .doc-status.proc{color:var(--gold);}
+    .processing-bar{height:3px;background:var(--border);border-radius:2px;margin-top:.3rem;overflow:hidden;}
+    .processing-fill{height:100%;width:65%;background:var(--gold);border-radius:2px;animation:pbar 1.5s ease-in-out infinite alternate;}
+    @keyframes pbar{from{width:20%;}to{width:90%;}}
+
+    /* Chat mockup */
+    .chat-wrap{display:flex;flex-direction:column;gap:.75rem;}
+    .c-msg{display:flex;gap:.6rem;align-items:flex-start;}
+    .c-msg.user{flex-direction:row-reverse;}
+    .c-av{width:28px;height:28px;border-radius:50%;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;}
+    .c-av.ai{background:var(--ink);color:white;}
+    .c-av.user{background:var(--teal-lt);color:var(--teal);}
+    .c-bub{border-radius:12px;padding:.65rem .9rem;font-size:.82rem;line-height:1.55;max-width:80%;}
+    .c-bub.user{background:var(--teal);color:white;border-bottom-right-radius:4px;}
+    .c-bub.ai{background:var(--bg2);border:1px solid var(--border);color:var(--ink2);border-bottom-left-radius:4px;}
+    .c-bub.ai strong{color:var(--teal);}
+    .chat-input-row{display:flex;gap:.5rem;margin-top:.5rem;background:var(--bg2);border:1px solid var(--border);border-radius:100px;padding:.4rem .4rem .4rem 1rem;}
+    .chat-input-fake{flex:1;font-size:.82rem;color:var(--ink3);display:flex;align-items:center;}
+    .chat-send{background:var(--ink);color:white;border-radius:100px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0;}
+
+    /* Summary mockup */
+    .summary-card{background:var(--bg2);border-radius:var(--radius-sm);padding:1rem;margin-bottom:.75rem;}
+    .summary-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);margin-bottom:.6rem;}
+    .summary-row{display:flex;justify-content:space-between;font-size:.8rem;padding:.3rem 0;border-bottom:1px solid var(--border);}
+    .summary-row:last-child{border:none;}
+    .summary-key{color:var(--ink3);}
+    .summary-val{font-weight:600;color:var(--ink);font-size:.77rem;}
+    .print-btn{background:var(--ink);color:white;border-radius:100px;padding:.55rem 1.2rem;font-size:.82rem;font-weight:600;border:none;width:100%;display:flex;align-items:center;justify-content:center;gap:.4rem;cursor:pointer;transition:opacity .2s;}
+    .print-btn:hover{opacity:.85;}
+
+    /* WHY — STATEMENT + ICON GRID */
+    #why{background:white;padding:6rem 0;}
+    .why-layout{display:grid;grid-template-columns:1fr 1.4fr;gap:5rem;align-items:start;margin-top:3rem;}
+    .why-anchor{position:sticky;top:120px;}
+    .why-anchor-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);margin-bottom:1rem;display:block;}
+    .why-anchor h2{margin-bottom:1.2rem;font-size:clamp(1.7rem,3vw,2.5rem);}
+    .why-anchor p{font-size:.95rem;color:var(--ink3);line-height:1.75;margin-bottom:2rem;}
+    .why-anchor-cta{display:inline-flex;align-items:center;gap:.5rem;font-size:.88rem;font-weight:700;color:var(--teal);text-decoration:none;border-bottom:1.5px solid var(--teal-mid);padding-bottom:.2rem;transition:border-color .2s,color .2s;}
+    .why-anchor-cta:hover{color:var(--ink);border-color:var(--ink);}
+    .why-items{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+    .why-item{padding:1.8rem;border-bottom:1px solid var(--border);border-right:1px solid var(--border);transition:background .2s;}
+    .why-item:hover{background:var(--bg2);}
+    .why-item:nth-child(even){border-right:none;}
+    .why-item:nth-last-child(-n+2){border-bottom:none;}
+    .why-item-icon{width:38px;height:38px;border-radius:10px;background:var(--teal-lt);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--teal);margin-bottom:1rem;}
+    .why-item h4{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.95rem;color:var(--ink);margin-bottom:.4rem;}
+    .why-item p{font-size:.85rem;color:var(--ink3);line-height:1.6;margin:0;}
+
+    /* FAQ */
+    #faq{background:var(--bg2);}
+    .faq-item{border-bottom:1px solid var(--border);padding:1.5rem 0;}
+    .faq-q{display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-weight:600;font-size:1rem;color:var(--ink);gap:1rem;user-select:none;}
+    .faq-toggle{width:28px;height:28px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--ink3);flex-shrink:0;transition:background .2s,transform .3s;font-family:'Plus Jakarta Sans',sans-serif;}
+    .faq-item.open .faq-toggle{background:var(--ink);color:white;transform:rotate(45deg);}
+    .faq-a{max-height:0;overflow:hidden;transition:max-height .4s ease;}
+    .faq-item.open .faq-a{max-height:300px;}
+    .faq-a p{padding-top:1rem;font-size:.92rem;color:var(--ink3);line-height:1.7;margin:0;}
+
+    /* CTA */
+    #cta{background:var(--ink);padding:6rem 0;text-align:center;}
+    #cta h2{color:white;}
+    #cta p{color:rgba(255,255,255,.55);max-width:480px;margin:1rem auto 2rem;font-size:1rem;}
+    .waitlist-row{display:flex;gap:.6rem;max-width:440px;margin:0 auto;}
+    .wl-input{flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:100px;padding:.8rem 1.4rem;color:white;font-size:.92rem;font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .2s;}
+    .wl-input:focus{border-color:rgba(255,255,255,.35);}
+    .wl-input::placeholder{color:rgba(255,255,255,.35);}
+    .btn-wl{background:white;color:var(--ink);font-weight:700;font-size:.9rem;border-radius:100px;padding:.8rem 1.6rem;border:none;white-space:nowrap;transition:opacity .2s;cursor:pointer;}
+    .btn-wl:hover{opacity:.88;}
+    #wl-msg{font-size:.85rem;min-height:1.4em;margin-top:.8rem;color:#7BBDFF;}
+    .cta-note{font-size:.8rem;color:rgba(255,255,255,.35);margin-top:.5rem;}
+
+    /* LIVE COUNTER */
+    .live-counter{display:inline-flex;align-items:center;gap:.5rem;font-size:.83rem;color:var(--ink3);margin-top:.5rem;}
+    .live-counter-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);animation:livePulseGreen 2s infinite;flex-shrink:0;}
+    @keyframes livePulseGreen{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(1.3);}}
+    .live-counter strong{color:var(--ink);font-weight:700;}
+    .live-counter-dark{color:rgba(255,255,255,.5);}
+    .live-counter-dark strong{color:white;}
+
+    /* FOOTER */
+    footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0;}
+    .footer-brand{font-family:'Instrument Serif',serif;font-size:1.2rem;color:var(--ink);display:flex;align-items:center;gap:.5rem;}
+    .footer-links{display:flex;flex-wrap:wrap;gap:.2rem 1.5rem;}
+    .footer-links a{font-size:.85rem;color:var(--ink3);text-decoration:none;transition:color .2s;}
+    .footer-links a:hover{color:var(--ink);}
+    .footer-legal{font-size:.78rem;color:var(--ink3);}
+
+    /* ANIMATIONS */
+    .reveal{opacity:0;transform:translateY(20px);transition:opacity .6s cubic-bezier(.22,1,.36,1),transform .6s cubic-bezier(.22,1,.36,1);}
+    .reveal.visible{opacity:1;transform:none;}
+    .reveal-d1{transition-delay:.08s;}
+    .reveal-d2{transition-delay:.16s;}
+    .reveal-d3{transition-delay:.24s;}
+
+    /* VIDEO SECTION */
+    #demo{background:var(--ink);padding:5rem 0;}
+    .video-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.35);text-align:center;margin-bottom:.8rem;}
+    .video-heading{font-family:'Instrument Serif',serif;font-size:clamp(1.6rem,3vw,2.4rem);color:white;text-align:center;letter-spacing:-.02em;margin-bottom:2.5rem;}
+    .video-shell{max-width:820px;margin:0 auto;border-radius:20px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.08);position:relative;}
+    .video-shell video{width:100%;display:block;border-radius:20px;}
+    .video-shell::before{content:'';position:absolute;inset:0;border-radius:20px;background:linear-gradient(to bottom,rgba(0,38,119,.04),transparent);pointer-events:none;z-index:1;}
+
+    /* FOUNDER STORY */
+    #story{background:var(--ink);padding:5rem 0;position:relative;overflow:hidden;}
+    .story-bg{position:absolute;inset:0;background-image:radial-gradient(circle at 80% 50%,rgba(25,110,207,.12) 0%,transparent 60%);pointer-events:none;}
+    .story-overline{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:#7BBDFF;margin-bottom:1.2rem;display:block;}
+    .story-quote{font-family:'Instrument Serif',serif;font-size:clamp(1.5rem,2.5vw,2.1rem);color:white;line-height:1.38;letter-spacing:-.02em;margin-bottom:0;}
+    .story-quote em{color:#7BBDFF;font-style:italic;}
+    .story-body{font-size:.95rem;color:rgba(255,255,255,.75);line-height:1.8;margin-top:1.8rem;}
+    .story-body p{margin-bottom:1rem;}
+    .story-body p:last-child{margin:0;}
+    .story-divider{width:1px;background:rgba(255,255,255,.1);align-self:stretch;margin:0 1rem;}
+    .story-sig{display:flex;align-items:center;gap:.9rem;margin-top:2.2rem;padding-top:2rem;border-top:1px solid rgba(255,255,255,.1);}
+    .sig-avatar{width:44px;height:44px;border-radius:50%;background:rgba(25,110,207,.2);border:1px solid rgba(25,110,207,.4);display:flex;align-items:center;justify-content:center;font-family:'Instrument Serif',serif;font-size:1rem;color:#7BBDFF;flex-shrink:0;}
+    .sig-name{font-weight:600;font-size:.9rem;color:white;}
+    .sig-title{font-size:.78rem;color:rgba(255,255,255,.5);margin-top:.1rem;}
+    .story-stat-col{display:flex;flex-direction:column;justify-content:center;gap:2.5rem;padding-left:3rem;}
+    .story-stat-num{font-family:'Instrument Serif',serif;font-size:3rem;color:white;line-height:1;}
+    .story-stat-num span{color:#7BBDFF;}
+    .story-stat-label{font-size:.85rem;color:rgba(255,255,255,.75);margin-top:.3rem;max-width:160px;line-height:1.55;}
+    .story-stat-source{font-size:.68rem;color:rgba(255,255,255,.4);font-family:'JetBrains Mono',monospace;display:block;margin-top:.3rem;}
+
+    /* SOCIAL PROOF */
+    #proof{background:white;padding:6rem 0;}
+    .proof-quote-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem;}
+    .proof-card{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:2rem;display:flex;flex-direction:column;justify-content:space-between;gap:1.5rem;transition:box-shadow .2s,transform .2s;}
+    .proof-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-3px);}
+    .proof-tag{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--teal);background:var(--teal-lt);border-radius:100px;padding:.2rem .65rem;display:inline-block;margin-bottom:.9rem;}
+    .proof-text{font-size:.92rem;color:var(--ink2);line-height:1.65;flex:1;margin:0;}
+    .proof-person{display:flex;align-items:center;gap:.9rem;padding-top:1.2rem;border-top:1px solid var(--border);}
+    .proof-stat{font-family:'Instrument Serif',serif;font-size:1.6rem;color:var(--teal);line-height:1;flex-shrink:0;letter-spacing:-.02em;}
+    .proof-name{font-weight:700;font-size:.88rem;color:var(--ink);}
+    .proof-meta{font-size:.73rem;color:var(--ink3);margin-top:.1rem;line-height:1.4;}
+    .proof-card.featured{background:var(--ink);border-color:var(--ink);}
+    .proof-card.featured .proof-text{color:rgba(255,255,255,.65);}
+    .proof-card.featured .proof-name{color:white;}
+    .proof-card.featured .proof-meta{color:rgba(255,255,255,.35);}
+    .proof-card.featured .proof-person{border-color:rgba(255,255,255,.1);}
+    .proof-card.featured .proof-tag{background:rgba(25,110,207,.2);color:#7BBDFF;}
+    .proof-early-access{margin-top:2rem;}
+    .proof-ea-inner{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:2rem 2.5rem;display:flex;align-items:center;justify-content:space-between;gap:2rem;}
+    .proof-ea-inner h3{margin-bottom:.4rem;}
+    .proof-ea-inner p{font-size:.9rem;color:var(--ink3);margin:0;max-width:480px;}
+    .btn-ea{background:var(--ink);color:white;font-weight:600;font-size:.88rem;border-radius:100px;padding:.7rem 1.5rem;border:none;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;transition:opacity .2s,transform .2s;flex-shrink:0;}
+    .btn-ea:hover{opacity:.85;transform:translateY(-1px);color:white;}
+
+    /* RESPONSIVE */
+    @media(max-width:991px){
+      .features-layout{grid-template-columns:1fr;}
+      .feat-mockup-wrap{position:static;}
+      .why-layout{grid-template-columns:1fr;}
+      .why-anchor{position:static;}
+      .why-items{grid-template-columns:1fr;}
+      .why-item:nth-child(even){border-right:none;}
+      .why-item:nth-last-child(-n+2){border-bottom:1px solid var(--border);}
+      .why-item:last-child{border-bottom:none;}
+      .proof-quote-grid{grid-template-columns:1fr;}
+      .proof-ea-inner{flex-direction:column;align-items:flex-start;}
+      .story-stat-col{padding-left:0;padding-top:2rem;flex-direction:row;flex-wrap:wrap;gap:1.5rem;}
+      .story-divider{display:none;}
+    }
+      .feature-item{grid-template-columns:1fr;gap:2rem;}
+      .feature-item.reverse .feat-text{order:0;}
+      .feature-item.reverse .mockup-card{order:0;}
+      .preview-body{grid-template-columns:1fr;}
+      .preview-sidebar{border-right:none;border-bottom:1px solid var(--border);}
+      .why-grid{grid-template-columns:1fr;}
+    
+    @media(max-width:575px){
+      .waitlist-row{flex-direction:column;}
+      h1{font-size:2.4rem;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="#">
+      <div class="brand-icon"><i class="bi bi-heart-pulse-fill"></i></div>
+      Phármakon
+    </a>
+    <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+      <i class="bi bi-list fs-4" style="color:var(--ink)"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+        <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+        <li class="nav-item"><a class="nav-link" href="#why">Why Phármakon</a></li>
+        <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
+        <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+          <a href="#cta" class="nav-link btn-cta">Get Early Access</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-blob"></div>
+  <div class="container position-relative">
+    <div class="yc-badge">
+      <div class="yc-dot">+</div>
+      Built for patients who are tired of starting from zero
+    </div>
+    <h1>Everything health,<br/><em>now remembered.</em></h1>
+    <p class="hero-sub">An intelligent tracker, interpreter &amp; care companion — all in one. One profile, every provider, forever.</p>
+    <div class="d-flex flex-column align-items-center gap-2">
+      <a href="#cta" class="btn-hero">Get early access <i class="bi bi-arrow-right"></i></a>
+      <p class="hero-note">Free to join the waitlist — no credit card required.</p>
+      <div class="live-counter" id="heroCounter">
+        <span class="live-counter-dot"></span>
+        <span>Join <strong id="heroCount">...</strong> others already on the waitlist</span>
+      </div>
+    </div>
+
+    <div class="hero-preview reveal">
+      <div class="preview-shell">
+        <div class="preview-titlebar">
+          <div class="tb-dot r"></div><div class="tb-dot y"></div><div class="tb-dot g"></div>
+          <div class="tb-bar">app.pharmakon.io — Health Profile</div>
+        </div>
+        <div class="preview-body">
+          <div class="preview-sidebar">
+            <div class="sidebar-profile">
+              <div class="s-avatar">JA</div>
+              <div>
+                <div class="s-name">Jordan Alvarez</div>
+                <div class="s-sub">5 years of data · 4 providers</div>
+              </div>
+            </div>
+            <div class="sidebar-row"><span class="s-key">Conditions</span><span class="s-val">Hypothyroidism</span></div>
+            <div class="sidebar-row"><span class="s-key">Medications</span><span class="s-val">Levothyroxine 75mcg</span></div>
+            <div class="sidebar-row"><span class="s-key">Last TSH</span><span class="badge-gold">5.2 — High</span></div>
+            <div class="sidebar-row"><span class="s-key">Ferritin</span><span class="badge-red">18 — Low</span></div>
+            <div class="sidebar-row"><span class="s-key">Colonoscopy</span><span class="badge-teal">Due 2026</span></div>
+            <div class="sidebar-row"><span class="s-key">Allergies</span><span class="s-val">Sulfa drugs</span></div>
+          </div>
+          <div class="preview-main">
+            <div class="insight-card">
+              <div class="insight-header"><i class="bi bi-stars"></i> Phármakon Insight</div>
+              <p>Your TSH has risen from <strong>3.1 → 5.2</strong> over 18 months while you've reported fatigue 14 times. Combined with your low ferritin of <strong>18</strong>, your Levothyroxine dose may need review. A pre-visit summary is ready.</p>
+            </div>
+            <div class="lab-mini-title">Lab Trends</div>
+            <div class="lab-row"><span class="lab-name">TSH</span><div class="lab-track"><div class="lab-fill warn" data-w="82"></div></div><span class="lab-num warn">5.2</span></div>
+            <div class="lab-row"><span class="lab-name">Ferritin</span><div class="lab-track"><div class="lab-fill bad" data-w="18"></div></div><span class="lab-num bad">18</span></div>
+            <div class="lab-row"><span class="lab-name">HbA1c</span><div class="lab-track"><div class="lab-fill ok" data-w="62"></div></div><span class="lab-num ok">5.4</span></div>
+            <div class="lab-row"><span class="lab-name">Vit D</span><div class="lab-track"><div class="lab-fill ok" data-w="55"></div></div><span class="lab-num ok">38</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VIDEO DEMO -->
+<section id="demo">
+  <div class="container">
+    <div class="video-label">See It In Action</div>
+    <h2 class="video-heading">Watch Phármakon work.</h2>
+    <div class="video-shell reveal">
+      <video
+        controls
+        playsinline
+        preload="metadata"
+        poster=""
+        style="background:#000;">
+        <source src="pharmakon-demo.mp4" type="video/mp4"/>
+        Your browser does not support video playback.
+      </video>
+    </div>
+  </div>
+</section>
+
+<!-- FOUNDER STORY -->
+<section id="story">
+  <div class="story-bg"></div>
+  <div class="container position-relative">
+    <div class="row align-items-center">
+
+      <div class="col-lg-7 reveal">
+        <span class="story-overline">Why We Built This</span>
+        <p class="story-quote">
+          A family member handed a new specialist<br/>
+          a blank intake form for the <em>fourth time in a year.</em><br/>
+          We decided that was the last time.
+        </p>
+        <div class="story-body">
+          <p>We work inside healthcare. We see what patients go through — not in theory, but in the actual administrative friction of every intake form, every fragmented portal, every provider who has never seen a record from the one before them. The information exists. It just lives nowhere useful.</p>
+          <p>Phármakon exists because the problem is not clinical. It is structural. Patients carry all the cognitive load of a system that was never designed to remember them. We are building the system that finally does.</p>
+        </div>
+        <div class="story-sig">
+          <div class="sig-avatar"><i class="bi bi-people-fill" style="font-size:.9rem;"></i></div>
+          <div>
+            <div class="sig-name">Built by a team working inside healthcare.</div>
+            <div class="sig-title">Because we see this problem every single day.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-1 d-none d-lg-flex justify-content-center">
+        <div class="story-divider"></div>
+      </div>
+
+      <div class="col-lg-4 story-stat-col reveal reveal-d1">
+        <div>
+          <div class="story-stat-num">55<span>%</span></div>
+          <div class="story-stat-label">Of patients report their medical history is missing or incomplete when they visit their physician</div>
+          <span class="story-stat-source">Surescripts / Kelton Global, n=1,000+</span>
+        </div>
+        <div>
+          <div class="story-stat-num">1<span> in 3</span></div>
+          <div class="story-stat-label">Patients receive duplicate tests because their records are fragmented across providers</div>
+          <span class="story-stat-source">Boston Children's Hospital study</span>
+        </div>
+        <div>
+          <div class="story-stat-num">10<span>–20%</span></div>
+          <div class="story-stat-label">Of all patient encounters involve a missed, inaccurate, or delayed diagnosis — most often from missing information</div>
+          <span class="story-stat-source">Medical literature consensus, Chief Healthcare Executive</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+
+    <div class="features-header reveal">
+      <div class="label-tag">Core Features</div>
+      <h2>Everything you need<br/>to own your health.</h2>
+      <p>Intelligent automation that adapts to every document, interprets every result, and saves you from starting over at every new provider.</p>
+    </div>
+
+    <div class="features-layout">
+
+      <!-- TABS -->
+      <div class="feat-tabs reveal">
+
+        <div class="feat-tab active" onclick="switchTab(0)">
+          <div class="feat-tab-num">01 &nbsp;·&nbsp; Document Intelligence</div>
+          <div class="feat-tab-title">Drop in any medical document.</div>
+          <div class="feat-tab-desc">Discharge summaries, lab reports, EOBs, referral letters. Phármakon extracts, structures, and adds everything to your profile automatically.</div>
+          <ul class="feat-tab-list">
+            <li>PDFs, images, and scanned documents</li>
+            <li>Automatic OCR and clinical entity extraction</li>
+            <li>Medications, diagnoses, allergies, dates all parsed</li>
+            <li>Review before anything saves to your profile</li>
+          </ul>
+        </div>
+
+        <div class="feat-tab" onclick="switchTab(1)">
+          <div class="feat-tab-num">02 &nbsp;·&nbsp; AI That Knows You</div>
+          <div class="feat-tab-title">Answers grounded in your actual record.</div>
+          <div class="feat-tab-desc">Ask anything about your health and get answers drawn entirely from your personal history — not generic internet advice. The longer you use Phármakon, the smarter it gets.</div>
+          <ul class="feat-tab-list">
+            <li>Pattern recognition across months and years</li>
+            <li>Medication cross-referencing and interaction flags</li>
+            <li>Preventive care gap detection</li>
+            <li>Trend analysis across all your lab results</li>
+          </ul>
+        </div>
+
+        <div class="feat-tab" onclick="switchTab(2)">
+          <div class="feat-tab-num">03 &nbsp;·&nbsp; Pre-Visit Summaries</div>
+          <div class="feat-tab-title">Walk in prepared. Every time.</div>
+          <div class="feat-tab-desc">A one-page clinical brief — current problems, medications, recent labs, top concerns — generated before every appointment and ready to hand to any provider.</div>
+          <ul class="feat-tab-list">
+            <li>Auto-generated before each appointment</li>
+            <li>Clinician-readable, one-page format</li>
+            <li>Shareable link or downloadable PDF</li>
+            <li>Eliminates the intake form problem permanently</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- MOCKUPS -->
+      <div class="feat-mockup-wrap reveal reveal-d1">
+
+        <div class="feat-panel active" id="panel-0">
+          <div class="mockup-card">
+            <div class="mockup-header"><div class="m-dot r"></div><div class="m-dot y"></div><div class="m-dot g"></div></div>
+            <div class="mockup-body">
+              <div class="upload-zone">
+                <div class="upload-icon"><i class="bi bi-cloud-upload"></i></div>
+                <div class="upload-label"><strong>Click to upload</strong> or drag &amp; drop<br/>PDF, JPG, PNG supported</div>
+              </div>
+              <div class="doc-item">
+                <div class="doc-icon"><i class="bi bi-file-earmark-bar-graph"></i></div>
+                <div class="flex-grow-1">
+                  <div class="doc-name">LabResults_March2025.pdf</div>
+                  <div class="processing-bar"><div class="processing-fill"></div></div>
+                </div>
+                <span class="doc-status proc">Extracting…</span>
+              </div>
+              <div class="doc-item">
+                <div class="doc-icon"><i class="bi bi-clipboard2-pulse"></i></div>
+                <div class="flex-grow-1"><div class="doc-name">DischargeSummary_Dec2024.pdf</div></div>
+                <span class="doc-status done"><i class="bi bi-check-circle-fill"></i> Done</span>
+              </div>
+              <div class="doc-item">
+                <div class="doc-icon"><i class="bi bi-capsule"></i></div>
+                <div class="flex-grow-1"><div class="doc-name">Rx_Levothyroxine_2024.jpg</div></div>
+                <span class="doc-status done"><i class="bi bi-check-circle-fill"></i> Done</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="feat-panel" id="panel-1">
+          <div class="mockup-card">
+            <div class="mockup-header"><div class="m-dot r"></div><div class="m-dot y"></div><div class="m-dot g"></div></div>
+            <div class="mockup-body">
+              <div class="chat-wrap">
+                <div class="c-msg user">
+                  <div class="c-av user">JA</div>
+                  <div class="c-bub user">Why do I keep feeling exhausted?</div>
+                </div>
+                <div class="c-msg">
+                  <div class="c-av ai">P</div>
+                  <div class="c-bub ai">Based on your record, three things stand out: your <strong>TSH rose 3.1 → 5.2</strong> over 18 months, your <strong>ferritin is at 18</strong> (below optimal), and fatigue appears <strong>14 times</strong> in your logs in 6 months. I've prepared a summary for your next appointment.</div>
+                </div>
+                <div class="c-msg user">
+                  <div class="c-av user">JA</div>
+                  <div class="c-bub user">Is my Levothyroxine dose okay?</div>
+                </div>
+                <div class="c-msg">
+                  <div class="c-av ai">P</div>
+                  <div class="c-bub ai">Your current dose is <strong>75mcg</strong>, started Jan 2023. Given your rising TSH, this is worth discussing with your endocrinologist — your last visit was <strong>11 months ago</strong>.</div>
+                </div>
+              </div>
+              <div class="chat-input-row">
+                <div class="chat-input-fake">Ask about your health…</div>
+                <div class="chat-send"><i class="bi bi-arrow-up"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="feat-panel" id="panel-2">
+          <div class="mockup-card">
+            <div class="mockup-header"><div class="m-dot r"></div><div class="m-dot y"></div><div class="m-dot g"></div></div>
+            <div class="mockup-body">
+              <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);margin-bottom:.8rem;display:flex;justify-content:space-between;align-items:center;">
+                <span>Pre-Visit Summary</span>
+                <span style="color:var(--teal);background:var(--teal-lt);padding:.2rem .6rem;border-radius:100px;">Ready</span>
+              </div>
+              <div class="summary-card">
+                <div class="summary-title">Active Conditions</div>
+                <div class="summary-row"><span class="summary-key">Hypothyroidism</span><span class="summary-val">Since Jan 2020</span></div>
+                <div class="summary-row"><span class="summary-key">GERD</span><span class="summary-val">Since Aug 2022</span></div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-title">Current Medications</div>
+                <div class="summary-row"><span class="summary-key">Levothyroxine</span><span class="summary-val">75mcg · Daily</span></div>
+                <div class="summary-row"><span class="summary-key">Omeprazole</span><span class="summary-val">20mg · As needed</span></div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-title">Today's Concerns</div>
+                <div class="summary-row"><span class="summary-key">Ongoing fatigue — 6 months</span><span class="summary-val badge-gold">Priority</span></div>
+                <div class="summary-row"><span class="summary-key">TSH trending up</span><span class="summary-val badge-gold">Review</span></div>
+              </div>
+              <button class="print-btn"><i class="bi bi-download"></i> Download PDF Summary</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY -->
+<section id="why">
+  <div class="container">
+    <div class="why-layout">
+
+      <div class="why-anchor reveal">
+        <span class="why-anchor-label">Why Phármakon</span>
+        <h2>Built for you.<br/>Controlled by you.<br/>Owned by you.</h2>
+        <p>The only health intelligence platform that prioritizes your privacy, compounds in value over time, and works across every provider you will ever see.</p>
+        <a href="#cta" class="why-anchor-cta">Join the waitlist <i class="bi bi-arrow-right ms-1"></i></a>
+      </div>
+
+      <div class="why-items reveal reveal-d1">
+
+        <div class="why-item">
+          <div class="why-item-icon"><i class="bi bi-eye"></i></div>
+          <h4>Complete Transparency</h4>
+          <p>Every extraction and profile update is visible. Nothing happens to your data without you seeing it first.</p>
+        </div>
+
+        <div class="why-item">
+          <div class="why-item-icon"><i class="bi bi-shield-lock-fill"></i></div>
+          <h4>HIPAA-Grade Security</h4>
+          <p>Clinical-grade infrastructure with encryption at rest and in transit, BAAs with every vendor, and full audit logging.</p>
+        </div>
+
+        <div class="why-item">
+          <div class="why-item-icon"><i class="bi bi-person-lock"></i></div>
+          <h4>You Own Your Data</h4>
+          <p>Never sold, never shared with insurers, never used to train models without your explicit consent.</p>
+        </div>
+
+        <div class="why-item">
+          <div class="why-item-icon"><i class="bi bi-graph-up-arrow"></i></div>
+          <h4>Compounds Over Time</h4>
+          <p>Six months of data is useful. Three years is irreplaceable. Phármakon gets smarter the longer you use it.</p>
+        </div>
+
+        <div class="why-item">
+          <div class="why-item-icon"><i class="bi bi-hospital"></i></div>
+          <h4>Works With Any Provider</h4>
+          <p>Not tied to any single health system. Import from any portal, share with any provider, anywhere.</p>
+        </div>
+
+        <div class="why-item">
+          <div class="why-item-icon"><i class="bi bi-activity"></i></div>
+          <h4>Clinically Grounded</h4>
+          <p>Phármakon informs — never diagnoses. Every insight is a starting point for a conversation, not a replacement for care.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF -->
+<section id="proof">
+  <div class="container">
+    <div class="text-center reveal">
+      <div class="label-tag">The Research</div>
+      <h2 class="mt-2">The problem is not anecdotal.<br/>It is structural.</h2>
+      <p class="mt-3" style="color:var(--ink3);max-width:520px;margin-left:auto;margin-right:auto;font-size:.95rem;">Every design decision in Phármakon is grounded in peer-reviewed research and published clinical studies on the real cost of fragmented health records.</p>
+    </div>
+
+    <div class="proof-quote-grid">
+
+      <div class="proof-card reveal">
+        <div>
+          <div class="proof-tag">Incomplete Records</div>
+          <p class="proof-text">Of patients report their medical history is missing or incomplete when they visit their physician — meaning the provider is making decisions without full context.</p>
+        </div>
+        <div class="proof-person">
+          <div class="proof-stat">55%</div>
+          <div>
+            <div class="proof-name">Surescripts Patient Survey</div>
+            <div class="proof-meta">Conducted by Kelton Global &nbsp;·&nbsp; n = 1,000+ respondents</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="proof-card featured reveal reveal-d1">
+        <div>
+          <div class="proof-tag" style="color:rgba(255,255,255,.5);">Duplicate Testing</div>
+          <p class="proof-text">Patients receive redundant tests because their records are fragmented across providers — adding cost, delay, and unnecessary burden to every affected patient.</p>
+        </div>
+        <div class="proof-person">
+          <div class="proof-stat" style="color:white;">1 in 3</div>
+          <div>
+            <div class="proof-name">Boston Children's Hospital</div>
+            <div class="proof-meta">Peer-reviewed study on fragmented health record impact</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="proof-card reveal reveal-d2">
+        <div>
+          <div class="proof-tag">Diagnostic Error</div>
+          <p class="proof-text">Of all patient encounters involve a missed, delayed, or inaccurate diagnosis — with unavailability of critical information cited as the leading cause.</p>
+        </div>
+        <div class="proof-person">
+          <div class="proof-stat">10–20%</div>
+          <div>
+            <div class="proof-name">Medical Literature Consensus</div>
+            <div class="proof-meta">Chief Healthcare Executive &nbsp;·&nbsp; NCBI, Cureus 2026</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="proof-early-access reveal">
+      <div class="proof-ea-inner">
+        <div>
+          <div class="label-tag mb-2">Early Access</div>
+          <h3 style="font-size:1.3rem;">We are currently in closed development.</h3>
+          <p>Real patient testimonials will appear here as our early access cohort grows. If you are a patient, caregiver, or clinician who wants to help shape this product, we want to hear from you.</p>
+        </div>
+        <a href="#cta" class="btn-ea">Join the waitlist <i class="bi bi-arrow-right"></i></a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-7">
+        <div class="text-center mb-5 reveal">
+          <div class="label-tag">FAQs</div>
+          <h2 class="mt-2">Questions about Phármakon?</h2>
+        </div>
+        <div class="faq-item reveal" onclick="toggleFaq(this)">
+          <div class="faq-q">How does Phármakon work? <span class="faq-toggle">+</span></div>
+          <div class="faq-a"><p>You upload medical documents or type your health history directly. Our AI extracts structured information — diagnoses, medications, lab results, providers — and builds a living clinical profile around you. Every new input improves the profile and sharpens the AI's answers.</p></div>
+        </div>
+        <div class="faq-item reveal" onclick="toggleFaq(this)">
+          <div class="faq-q">Is my health data safe? <span class="faq-toggle">+</span></div>
+          <div class="faq-a"><p>Yes. Phármakon runs on HIPAA-eligible infrastructure with encryption at rest and in transit, role-based access controls, full audit logging, and signed BAAs with every vendor that touches your data. Your data is never sold or shared with insurers, and never used to train AI models without your explicit opt-in.</p></div>
+        </div>
+        <div class="faq-item reveal" onclick="toggleFaq(this)">
+          <div class="faq-q">What documents can I upload? <span class="faq-toggle">+</span></div>
+          <div class="faq-a"><p>Phármakon accepts PDFs, JPGs, PNGs, and scanned images — including lab results, discharge summaries, EOBs, referral letters, imaging reports, prescriptions, and vaccination records. If your provider uses MyChart or another FHIR-compatible portal, you can import records directly.</p></div>
+        </div>
+        <div class="faq-item reveal" onclick="toggleFaq(this)">
+          <div class="faq-q">Is Phármakon a replacement for my doctor? <span class="faq-toggle">+</span></div>
+          <div class="faq-a"><p>No — and by design. Phármakon informs, surfaces patterns, and helps you prepare for care. It does not diagnose or recommend treatments. Every insight is a starting point for a conversation with your provider. When something warrants urgent attention, Phármakon tells you to seek care immediately.</p></div>
+        </div>
+        <div class="faq-item reveal" onclick="toggleFaq(this)">
+          <div class="faq-q">When will Phármakon be available? <span class="faq-toggle">+</span></div>
+          <div class="faq-a"><p>We are in closed development with a small group of patients. Waitlist members receive early access before public launch, along with direct input into the product roadmap. Join the waitlist below to secure your spot.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="container text-center">
+    <div class="label-tag mb-3" style="color:#7BBDFF;">GET STARTED TODAY</div>
+    <h2>Ready to build the health record<br/>that finally knows you?</h2>
+    <p>Questions or partnership inquiries? Reach out and we'll get back to you directly.</p>
+    <div class="waitlist-row">
+      <input type="email" class="wl-input" id="wlEmail" placeholder="Enter your email address"/>
+      <button class="btn-wl" id="wlBtn" onclick="handleWL()">Join Waitlist</button>
+    </div>
+    <div id="wl-msg"></div>
+    <div class="live-counter live-counter-dark mt-2" id="ctaCounter">
+      <span class="live-counter-dot"></span>
+      <span>Join <strong id="ctaCount">...</strong> others already on the waitlist</span>
+    </div>
+    <p class="cta-note">No spam. No commitment. Unsubscribe anytime.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-4">
+      <div>
+        <div class="footer-brand">
+          <div class="brand-icon" style="width:24px;height:24px;font-size:.7rem;"><i class="bi bi-heart-pulse-fill"></i></div>
+          Phármakon
+        </div>
+        <div class="footer-legal mt-1">Your health, finally remembered.</div>
+      </div>
+      <div class="footer-links">
+        <a href="#">Home</a>
+        <a href="#features">Features</a>
+        <a href="#faq">FAQ</a>
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">HIPAA Notice</a>
+      </div>
+    </div>
+    <hr style="border-color:var(--border);margin:1.5rem 0 1rem;"/>
+    <div class="d-flex flex-wrap justify-content-between gap-2">
+      <span class="footer-legal">&copy; Phármakon 2026. All Rights Reserved.</span>
+      <span class="footer-legal">Not a substitute for professional medical advice, diagnosis, or treatment.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // REVEAL
+  const ro = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); ro.unobserve(e.target); }});
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+  // LAB BARS
+  const lo = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('.lab-fill').forEach(b => b.style.width = (b.dataset.w || 60) + '%');
+        lo.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.preview-shell').forEach(el => lo.observe(el));
+
+  // FAQ
+  function toggleFaq(el) {
+    const open = el.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+    if (!open) el.classList.add('open');
+  }
+
+  // ─── LIVE COUNTER — auto-fetches from Kit via Netlify function ─
+  // Falls back to FALLBACK_COUNT if the function is unavailable.
+  // Update FALLBACK_COUNT manually to match your real Kit total
+  // until the Netlify function is deployed.
+
+  const FALLBACK_COUNT = 4; // ← matches current Kit total
+
+  async function fetchLiveCount() {
+    try {
+      const res = await fetch('/.netlify/functions/subscriber-count');
+      if (!res.ok) throw new Error('Function error');
+      const data = await res.json();
+      const count = data.count || 0;
+      if (count > 0) {
+        updateCounters(count);
+      } else {
+        updateCounters(FALLBACK_COUNT);
+      }
+    } catch (e) {
+      // Function not deployed yet — use fallback
+      updateCounters(FALLBACK_COUNT);
+    }
+  }
+
+  function updateCounters(count) {
+    const heroEl = document.getElementById('heroCount');
+    const ctaEl  = document.getElementById('ctaCount');
+    const label  = count === 1 ? 'other' : 'others';
+
+    if (count > 0) {
+      [heroEl, ctaEl].forEach(el => {
+        if (!el) return;
+        el.textContent = count.toLocaleString();
+        const parent = el.closest('.live-counter');
+        if (parent) {
+          const span = parent.querySelector('span:last-child');
+          if (span) span.textContent = `Join ${count.toLocaleString()} ${label} already on the waitlist`;
+        }
+      });
+      document.getElementById('heroCounter')?.style.removeProperty('display');
+      document.getElementById('ctaCounter')?.style.removeProperty('display');
+    } else {
+      document.getElementById('heroCounter')?.style.setProperty('display','none');
+      document.getElementById('ctaCounter')?.style.setProperty('display','none');
+    }
+  }
+
+  function incrementCounter() {
+    const heroEl = document.getElementById('heroCount');
+    const ctaEl  = document.getElementById('ctaCount');
+    [heroEl, ctaEl].forEach(el => {
+      if (!el) return;
+      const current = parseInt(el.textContent.replace(/,/g, '')) || 0;
+      const newCount = current + 1;
+      el.textContent = newCount.toLocaleString();
+      const parent = el.closest('.live-counter');
+      if (parent) {
+        const span = parent.querySelector('span:last-child');
+        if (span) span.textContent = `Join ${newCount.toLocaleString()} ${newCount === 1 ? 'other' : 'others'} already on the waitlist`;
+      }
+    });
+    document.getElementById('heroCounter')?.style.removeProperty('display');
+    document.getElementById('ctaCounter')?.style.removeProperty('display');
+  }
+
+  // Fetch real count on page load
+  fetchLiveCount();
+
+  // ─── WAITLIST — Kit hidden form POST (reliable, no CORS) ───
+  // Posts directly to Kit's native HTML form endpoint via a
+  // hidden iframe. No API key needed. Works on any static host.
+
+  const KIT_FORM_ID = '9353033'; // stored as env var in Netlify — safe to keep here as it is public
+
+  function handleWL() {
+    const input = document.getElementById('wlEmail');
+    const btn   = document.getElementById('wlBtn');
+    const msg   = document.getElementById('wl-msg');
+    const val   = input.value.trim();
+
+    // Validate email
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+      msg.style.color = '#FCA5A5';
+      msg.textContent = 'Please enter a valid email address.';
+      return;
+    }
+
+    // Loading state
+    btn.disabled = true;
+    btn.textContent = 'Joining…';
+    msg.textContent = '';
+
+    // Create hidden iframe — catches Kit's redirect so page stays put
+    const iframeName = 'kit_target_' + Date.now();
+    const iframe = document.createElement('iframe');
+    iframe.name = iframeName;
+    iframe.style.cssText = 'display:none;width:0;height:0;border:none;';
+    document.body.appendChild(iframe);
+
+    // Create hidden form posting to Kit's native endpoint
+    const form = document.createElement('form');
+    form.method  = 'POST';
+    form.action  = `https://app.kit.com/forms/${KIT_FORM_ID}/subscriptions`;
+    form.target  = iframeName;
+    form.style.display = 'none';
+
+    // Email field — Kit requires this exact field name
+    const emailInput = document.createElement('input');
+    emailInput.type  = 'hidden';
+    emailInput.name  = 'email_address';
+    emailInput.value = val;
+    form.appendChild(emailInput);
+
+    document.body.appendChild(form);
+    form.submit();
+
+    // After 2s assume success — Kit's form always accepts valid emails
+    setTimeout(() => {
+      msg.style.color = '#7BBDFF';
+      msg.textContent = "You're on the list — we'll be in touch soon.";
+      input.value   = '';
+      input.disabled = true;
+      btn.textContent = 'Joined ✓';
+      incrementCounter();
+
+      // Clean up
+      document.body.removeChild(form);
+      setTimeout(() => {
+        if (document.body.contains(iframe)) document.body.removeChild(iframe);
+      }, 3000);
+    }, 2000);
+  }
+
+  document.getElementById('wlEmail')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleWL();
+  });
+
+  // TAB SWITCHER
+  function switchTab(index) {
+    document.querySelectorAll('.feat-tab').forEach((t,i) => t.classList.toggle('active', i === index));
+    document.querySelectorAll('.feat-panel').forEach((p,i) => p.classList.toggle('active', i === index));
+  }
+</script>
+</body>
+</html>s
