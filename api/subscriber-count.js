@@ -13,21 +13,16 @@ export default async function handler(req, res) {
 
     if (!KIT_API_KEY) throw new Error('Missing API key');
 
+    // Try V3 API with api_key param — more reliable for subscriber counts
     const kitRes = await fetch(
-      `https://api.kit.com/v4/forms/${formId}/subscribers?per_page=1`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${KIT_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-      }
+      `https://api.convertkit.com/v3/forms/${formId}/subscriptions?api_key=${KIT_API_KEY}&per_page=1`,
+      { method: 'GET' }
     );
 
     if (!kitRes.ok) throw new Error('Kit API returned ' + kitRes.status);
 
     const data = await kitRes.json();
-    const count = data.pagination?.total ?? data.meta?.total_count ?? 0;
+    const count = data.total_subscriptions ?? 0;
 
     return res.status(200).json({ count });
 
